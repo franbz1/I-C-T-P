@@ -12,7 +12,7 @@ export default function Login() {
   };
 
   return (
-    <View className="flex-1 bg-neutral-500">
+    <View className="flex-1 bg-gray-100">
       <StatusBar barStyle="dark-content" />
       <View className="flex-1 justify-center px-4 pt-10">
         <Text className="text-3xl font-bold mb-6 text-center text-gray-800">Login</Text>
