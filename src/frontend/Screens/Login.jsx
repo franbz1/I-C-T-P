@@ -1,8 +1,9 @@
-// Login.js
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Alert, Image, Pressable, SafeAreaView, Switch, Text, TextInput, View, ActivityIndicator } from 'react-native';
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../../firebase";
+import { AuthContext } from '../../Backend/auth/authContext';
+import { useNavigation } from '@react-navigation/native';
 
 const logo = "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logo-GkqMfAxb66KRlDaOA5VdYBtk6PTLhN.jpg";
 const facebook = "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/placeholder.svg?height=40&width=40";
@@ -14,6 +15,9 @@ export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false); // Para manejar la visibilidad de la contraseña
+    const { setUser } = useContext(AuthContext);
+    const navigation = useNavigation();
 
     const handleLogin = async () => {
         if (!email || !password) {
@@ -30,10 +34,9 @@ export default function Login() {
 
         setLoading(true);
         try {
-            await signInWithEmailAndPassword(auth, email, password);
-            Alert.alert("¡Inicio de sesión exitoso!", "Bienvenido de nuevo.");
-            // Navegar a otra pantalla, por ejemplo:
-            // navigation.navigate('Home');
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+            setUser(user)
         } catch (error) {
             let errorMessage = "Ocurrió un error al iniciar sesión.";
             if (error.code === 'auth/user-not-found') {
@@ -80,16 +83,21 @@ export default function Login() {
                     autoCapitalize='none'
                     keyboardType='email-address'
                 />
-                <TextInput
-                    className="h-12 px-5 border border-yellow-400 rounded-md bg-white text-black"
-                    placeholder='CONTRASEÑA'
-                    placeholderTextColor="#666"
-                    secureTextEntry
-                    value={password}
-                    onChangeText={setPassword}
-                    autoCorrect={false}
-                    autoCapitalize='none'
-                />
+                <View className="flex-row items-center h-12 border border-yellow-400 rounded-md bg-white">
+                    <TextInput
+                        className="flex-1 px-5 text-black"
+                        placeholder='CONTRASEÑA'
+                        placeholderTextColor="#666"
+                        secureTextEntry={!showPassword} // Mostrar u ocultar contraseña
+                        value={password}
+                        onChangeText={setPassword}
+                        autoCorrect={false}
+                        autoCapitalize='none'
+                    />
+                    <Pressable onPress={() => setShowPassword(!showPassword)} className="px-3">
+                        <Text className="text-yellow-400">{showPassword ? '🙈' : '👁️'}</Text>
+                    </Pressable>
+                </View>
             </View>
             <View className="w-full px-12 flex-row justify-between items-center mb-2">
                 <View className="flex-row items-center space-x-1">
