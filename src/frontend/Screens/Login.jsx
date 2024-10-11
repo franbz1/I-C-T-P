@@ -36,7 +36,7 @@ export default function Login() {
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
-            setUser(user)
+            setUser(user);
         } catch (error) {
             let errorMessage = "Ocurrió un error al iniciar sesión.";
             if (error.code === 'auth/user-not-found') {
