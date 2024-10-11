@@ -105,7 +105,7 @@ export default function Login() {
                         value={rememberMe}
                         onValueChange={setRememberMe}
                         trackColor={{ true: "#FFC107", false: "#333" }}
-                        thumbColor={rememberMe ? "#FFD700" : "#f4f3f4"}
+                        thumbColor={rememberMe ? "FFD700#" : "#f4f3f4"}
                     />
                     <Text className="text-sm text-white">Recordarme</Text>
                 </View>
