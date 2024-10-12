@@ -1,27 +1,41 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { 
     View, 
     Text, 
     Pressable, 
     Alert, 
     FlatList, 
-    Modal 
+    Modal, 
+    TextInput 
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthContext } from '../../Backend/auth/authContext';
 import { signOut } from 'firebase/auth';
-import { auth } from '../../../firebase';
+import { auth, firestore } from '../../../firebase'; // Asegúrate de exportar 'db' desde tu configuración de Firebase
 import ProjectCard from '../components/projectCard';
 import AddProjectCard from '../components/AddProjectCard';
 import { Feather } from '@expo/vector-icons';
+import { collection, addDoc, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
 
 export default function Home() {
     const { user } = useContext(AuthContext);
-    const [projects, setProjects] = useState([
-        { id: '1', name: 'Proyecto 1', image: 'https://via.placeholder.com/150' },
-        { id: '2', name: 'Proyecto 2', image: 'https://via.placeholder.com/150' },
-    ]);
+    const [projects, setProjects] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [newProject, setNewProject] = useState({
+        contractNumber: '',
+        name: '',
+        startDate: '',
+        endDate: '',
+        image: '',
+    });
+
+    useEffect(() => {
+        const unsubscribe = onSnapshot(collection(firestore, 'projects'), (snapshot) => {
+            const projectsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setProjects(projectsList);
+        });
+        return () => unsubscribe();
+    }, []);
 
     const handleLogout = async () => {
         try {
@@ -32,13 +46,39 @@ export default function Home() {
         }
     };
 
-    const handleDeleteProject = (projectId) => {
-        setProjects(prevProjects => prevProjects.filter(project => project.id !== projectId));
-        Alert.alert("Eliminado", "El proyecto ha sido eliminado.");
+    const handleDeleteProject = async (projectId) => {
+        try {
+            await deleteDoc(doc(firestore, 'projects', projectId));
+            Alert.alert("Eliminado", "El proyecto ha sido eliminado.");
+        } catch (error) {
+            Alert.alert("Error", "No se pudo eliminar el proyecto.");
+        }
     };
 
-    const handleAddProject = () => {
-        Alert.alert("Añadir Proyecto", "Funcionalidad para añadir un nuevo proyecto.");
+    const handleAddProject = async () => {
+        if (!newProject.contractNumber || !newProject.name || !newProject.startDate || !newProject.endDate) {
+            Alert.alert("Error", "Por favor completa todos los campos obligatorios.");
+            return;
+        }
+    
+        // Verificar si la imagen está vacía y asignar un placeholder si es necesario
+        const imageUrl = newProject.image.trim() === '' 
+            ? 'https://via.placeholder.com/150' 
+            : newProject.image;
+    
+        try {
+            await addDoc(collection(firestore, 'projects'), {
+                ...newProject,
+                image: imageUrl, // Aseguramos que la imagen tiene un valor
+                bitacora: [],
+                informe: [],
+                nomina: [],
+            });
+            setNewProject({ contractNumber: '', name: '', startDate: '', endDate: '', image: '' });
+            toggleModal();
+        } catch (error) {
+            Alert.alert("Error", "No se pudo añadir el proyecto.");
+        }
     };
 
     const toggleModal = () => {
@@ -86,11 +126,71 @@ export default function Home() {
                 </View>
             </Modal>
 
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={isModalVisible}
+                onRequestClose={toggleModal}
+            >
+                <View className="flex-1 bg-black bg-opacity-50 justify-center items-center">
+                    <View className="w-4/5 bg-neutral-800 rounded-lg p-5">
+                        <Text className="text-lg font-bold text-yellow-400 mb-2">Añadir Proyecto</Text>
+                        <TextInput 
+                            placeholder="Número de contrato"
+                            placeholderTextColor="#ccc"
+                            value={newProject.contractNumber}
+                            onChangeText={(text) => setNewProject({ ...newProject, contractNumber: text })}
+                            className="bg-neutral-700 text-white p-2 rounded mb-2"
+                        />
+                        <TextInput 
+                            placeholder="Nombre del proyecto"
+                            placeholderTextColor="#ccc"
+                            value={newProject.name}
+                            onChangeText={(text) => setNewProject({ ...newProject, name: text })}
+                            className="bg-neutral-700 text-white p-2 rounded mb-2"
+                        />
+                        <TextInput 
+                            placeholder="Fecha de inicio (YYYY-MM-DD)"
+                            placeholderTextColor="#ccc"
+                            value={newProject.startDate}
+                            onChangeText={(text) => setNewProject({ ...newProject, startDate: text })}
+                            className="bg-neutral-700 text-white p-2 rounded mb-2"
+                        />
+                        <TextInput 
+                            placeholder="Fecha de finalización (YYYY-MM-DD)"
+                            placeholderTextColor="#ccc"
+                            value={newProject.endDate}
+                            onChangeText={(text) => setNewProject({ ...newProject, endDate: text })}
+                            className="bg-neutral-700 text-white p-2 rounded mb-2"
+                        />
+                        <TextInput 
+                            placeholder="Imagen (opcional)"
+                            placeholderTextColor="#ccc"
+                            value={newProject.image}
+                            onChangeText={(text) => setNewProject({ ...newProject, image: text })}
+                            className="bg-neutral-700 text-white p-2 rounded mb-2"
+                        />
+                        <Pressable 
+                            className="bg-yellow-400 py-2 px-5 rounded-md mb-2"
+                            onPress={handleAddProject}
+                        >
+                            <Text className="text-black font-bold">Añadir Proyecto</Text>
+                        </Pressable>
+                        <Pressable 
+                            className="bg-gray-500 py-2 px-4 rounded-md"
+                            onPress={toggleModal}
+                        >
+                            <Text className="text-white">Cerrar</Text>
+                        </Pressable>
+                    </View>
+                </View>
+            </Modal>
+
             <FlatList
                 data={[...projects, { id: 'add', name: 'Añadir Proyecto' }]} // Añadir el botón de añadir al final
                 renderItem={({ item }) =>
                     item.id === 'add' ? (
-                        <AddProjectCard onAdd={handleAddProject} />
+                        <AddProjectCard onAdd={toggleModal} /> // Cambia el manejo para abrir el modal
                     ) : (
                         renderItem({ item })
                     )
