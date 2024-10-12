@@ -3,8 +3,9 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthContext } from '../auth/authContext';
 import Login from '../../frontend/Screens/Login'; // Ajusta las rutas según tu estructura
-import Home from '../../frontend/Screens/Home'; // Pantalla principal después del login
+import Home from '../../frontend/Screens/DashBoard1'; // Pantalla principal después del login
 import Loading from '../../frontend/Screens/Loading'; // Pantalla de carga opcional
+import Proyecto from '../../frontend/Screens/Proyecto' //Pantalla de un proyecto
 
 const Stack = createNativeStackNavigator();
 
@@ -22,6 +23,7 @@ const AppNavigator = () => {
                     // Rutas para usuarios autenticados
                     <>
                         <Stack.Screen name="Home" component={Home} options={{ headerShown: false }} />
+                        <Stack.Screen name='Proyecto' component={Proyecto} options={{headerShown: false}} />
                         {/* Agrega más pantallas protegidas aquí */}
                     </>
                 ) : (
