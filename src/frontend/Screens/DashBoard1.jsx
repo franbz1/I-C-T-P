@@ -20,7 +20,8 @@ import { collection, addDoc, deleteDoc, doc, onSnapshot } from 'firebase/firesto
 export default function Home() {
     const { user } = useContext(AuthContext);
     const [projects, setProjects] = useState([]);
-    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isUserModalVisible, setIsUserModalVisible] = useState(false); // Modal de usuario
+    const [isProjectModalVisible, setIsProjectModalVisible] = useState(false); // Modal de añadir proyecto
     const [newProject, setNewProject] = useState({
         contractNumber: '',
         name: '',
@@ -60,29 +61,32 @@ export default function Home() {
             Alert.alert("Error", "Por favor completa todos los campos obligatorios.");
             return;
         }
-    
-        // Verificar si la imagen está vacía y asignar un placeholder si es necesario
+
         const imageUrl = newProject.image.trim() === '' 
             ? 'https://via.placeholder.com/150' 
             : newProject.image;
-    
+
         try {
             await addDoc(collection(firestore, 'projects'), {
                 ...newProject,
-                image: imageUrl, // Aseguramos que la imagen tiene un valor
+                image: imageUrl,
                 bitacora: [],
                 informe: [],
                 nomina: [],
             });
             setNewProject({ contractNumber: '', name: '', startDate: '', endDate: '', image: '' });
-            toggleModal();
+            toggleProjectModal();
         } catch (error) {
             Alert.alert("Error", "No se pudo añadir el proyecto.");
         }
     };
 
-    const toggleModal = () => {
-        setIsModalVisible(!isModalVisible);
+    const toggleUserModal = () => {
+        setIsUserModalVisible(!isUserModalVisible);
+    };
+
+    const toggleProjectModal = () => {
+        setIsProjectModalVisible(!isProjectModalVisible);
     };
 
     const renderItem = ({ item }) => (
@@ -95,16 +99,17 @@ export default function Home() {
     return (
         <SafeAreaView className="flex-1 bg-black">
             <View className="flex-row justify-end mb-2 px-4 pt-4">
-                <Pressable onPress={toggleModal}>
+                <Pressable onPress={toggleUserModal}>
                     <Feather name="user" size={28} color="#FFD700" />
                 </Pressable>
             </View>
 
+            {/* Modal de usuario */}
             <Modal
                 animationType="slide"
                 transparent={true}
-                visible={isModalVisible}
-                onRequestClose={toggleModal}
+                visible={isUserModalVisible}
+                onRequestClose={toggleUserModal}
             >
                 <View className="flex-1 bg-black bg-opacity-50 justify-center items-center">
                     <View className="w-4/5 bg-neutral-800 rounded-lg p-5 items-center">
@@ -118,7 +123,7 @@ export default function Home() {
                         </Pressable>
                         <Pressable 
                             className="bg-gray-500 py-2 px-4 rounded-md"
-                            onPress={toggleModal}
+                            onPress={toggleUserModal}
                         >
                             <Text className="text-white">Cerrar</Text>
                         </Pressable>
@@ -126,11 +131,12 @@ export default function Home() {
                 </View>
             </Modal>
 
+            {/* Modal para añadir proyectos */}
             <Modal
                 animationType="slide"
                 transparent={true}
-                visible={isModalVisible}
-                onRequestClose={toggleModal}
+                visible={isProjectModalVisible}
+                onRequestClose={toggleProjectModal}
             >
                 <View className="flex-1 bg-black bg-opacity-50 justify-center items-center">
                     <View className="w-4/5 bg-neutral-800 rounded-lg p-5">
@@ -178,7 +184,7 @@ export default function Home() {
                         </Pressable>
                         <Pressable 
                             className="bg-gray-500 py-2 px-4 rounded-md"
-                            onPress={toggleModal}
+                            onPress={toggleProjectModal}
                         >
                             <Text className="text-white">Cerrar</Text>
                         </Pressable>
@@ -190,7 +196,7 @@ export default function Home() {
                 data={[...projects, { id: 'add', name: 'Añadir Proyecto' }]} // Añadir el botón de añadir al final
                 renderItem={({ item }) =>
                     item.id === 'add' ? (
-                        <AddProjectCard onAdd={toggleModal} /> // Cambia el manejo para abrir el modal
+                        <AddProjectCard onAdd={toggleProjectModal} /> // Cambia el manejo para abrir el modal de proyectos
                     ) : (
                         renderItem({ item })
                     )
