@@ -7,7 +7,7 @@ export default function ProjectCard({ project, onDelete }) {
     const navigation = useNavigation();
 
     const handleNavigate = () => {
-        navigation.navigate('ProjectDetails', { id: project.id });
+        navigation.navigate('Proyecto', { id: project.id });
     };
 
     const handleDelete = () => {
@@ -24,7 +24,7 @@ export default function ProjectCard({ project, onDelete }) {
     return (
         <Pressable 
             onPress={handleNavigate}
-            className="w-[48%] bg-gray-800 m-1 p-4 rounded"
+            className="w-[48%] bg-neutral-800 m-1 p-4 rounded"
         >
             <View className="mb-2">
                 <Text className="text-white text-lg font-bold">{project.name}</Text>
