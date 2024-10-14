@@ -1,6 +1,6 @@
 // components/AddProjectCard.js
 import React from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { Text, Pressable } from 'react-native';
 
 export default function AddProjectCard({ onAdd }) {
     return (

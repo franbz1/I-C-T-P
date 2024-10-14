@@ -1,57 +1,62 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { styled } from 'nativewind';
+// screens/Proyecto.js
+import React, { useEffect, useState } from 'react';
+import { View, Text, Image, ActivityIndicator, Alert } from 'react-native';
+import { useRoute } from '@react-navigation/native';
+import { getProjectById } from '../../Backend/services/ProjectoService'; // Importa la función de obtener proyecto
 
-const StyledView = styled(View)
-const StyledText = styled(Text)
-const StyledTouchableOpacity = styled(TouchableOpacity)
-const StyledScrollView = styled(ScrollView)
-const StyledSafeAreaView = styled(SafeAreaView)
+export default function Proyecto() {
+    const route = useRoute();
+    const { id } = route.params; // El ID del proyecto que pasamos en la navegación
+    const [project, setProject] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-export default function ProjectManagement({ userRole = 'employee' }) {
-    const [projects, setProjects] = useState([
-        { id: 1, name: 'Project A', progress: 75 },
-        { id: 2, name: 'Project B', progress: 30 },
-        { id: 3, name: 'Project C', progress: 50 },
-    ]);
+    useEffect(() => {
+        const fetchProject = async () => {
+            try {
+                const fetchedProject = await getProjectById(id);
+                setProject(fetchedProject);
+            } catch (error) {
+                Alert.alert("Error", "No se pudo cargar el proyecto.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProject();
+    }, [id]);
+
+    if (loading) {
+        return (
+            <View className="flex-1 justify-center items-center">
+                <ActivityIndicator size="large" color="#FFD700" />
+            </View>
+        );
+    }
+
+    if (!project) {
+        return (
+            <View className="flex-1 justify-center items-center">
+                <Text className="text-white">Proyecto no encontrado</Text>
+            </View>
+        );
+    }
 
     return (
-        <StyledSafeAreaView className="flex-1 bg-black">
-            <StyledView className="flex-row justify-between items-center p-4 border-b border-gray-700">
-                <StyledText className="text-2xl font-bold text-white">
-                    ICTP INGENIERIA
-                </StyledText>
-            </StyledView>
-            <StyledScrollView className="flex-1 p-4">
-                {projects.map((project) => (
-                    <StyledTouchableOpacity
-                        key={project.id}
-                        className="mb-4 p-4 rounded-lg bg-neutral-800 shadow-md"
-                    >
-                        <StyledText className="text-lg font-semibold mb-2 text-white">
-                            {project.name}
-                        </StyledText>
-                        <StyledView className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
-                            <StyledView
-                                style={{ width: `${project.progress}%` }}
-                                className="h-full bg-yellow-400"
-                            />
-                        </StyledView>
-                        <StyledText className="mt-2 text-gray-300">
-                            Progress: {project.progress}%
-                        </StyledText>
-                    </StyledTouchableOpacity>
-                ))}
-            </StyledScrollView>
-            
-            {userRole === 'employer' && (
-                <StyledTouchableOpacity
-                    className="absolute bottom-6 right-6 w-14 h-14 rounded-full bg-yellow-400 items-center justify-center shadow-lg"
-                >
-                    <StyledText className="text-black text-3xl">+</StyledText>
-                </StyledTouchableOpacity>
-            )}
-        </StyledSafeAreaView>
+        <View className="flex-1 p-4 bg-black">
+            <View className="mb-4">
+                <Text className="text-yellow-400 text-2xl font-bold">{project.name}</Text>
+                <Text className="text-white mt-2">Número de Contrato: {project.contractNumber}</Text>
+            </View>
+            <Image 
+                source={{ uri: project.image || 'https://via.placeholder.com/150' }} 
+                style={{ height: 200, borderRadius: 8 }} 
+                resizeMode="cover" 
+                className="mb-4"
+            />
+            <View className="mb-4">
+                <Text className="text-white">Fecha de Inicio: {project.startDate}</Text>
+                <Text className="text-white">Fecha de Finalización: {project.endDate}</Text>
+            </View>
+        </View>
     );
 }

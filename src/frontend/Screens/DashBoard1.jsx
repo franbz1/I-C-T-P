@@ -76,6 +76,7 @@ export default function Home() {
                 bitacora: [],
                 informe: [],
                 nomina: [],
+                comentarios: [],
             });
             setNewProject({ contractNumber: '', name: '', startDate: '', endDate: '', image: '' });
             toggleProjectModal();
