@@ -7,47 +7,33 @@ export const createProject = async (projectData) => {
   try {
     const projectsCollection = collection(firestore, 'projects')
 
+    // Crear el documento del proyecto sin los comentarios (solo los datos principales)
     const docRef = await addDoc(projectsCollection, {
       contractNumber: projectData.contractNumber,
       projectName: projectData.projectName,
       startDate: Timestamp.fromDate(new Date(projectData.startDate)),
       endDate: Timestamp.fromDate(new Date(projectData.endDate)),
-      imageUrl: imageUrl, // Usar el link por defecto si está vacío o no definido
+      imageUrl: projectData.imageUrl || '', // Usar el link por defecto si está vacío o no definido
     })
 
-    // Crear subcolecciones para bitacora, informe, nomina y comentarios
-    const bitacoraCollection = collection(
-      firestore,
-      `projects/${docRef.id}/bitacora`
-    )
-    const informeCollection = collection(
-      firestore,
-      `projects/${docRef.id}/informe`
-    )
-    const nominaCollection = collection(
-      firestore,
-      `projects/${docRef.id}/nomina`
-    )
-    const comentariosCollection = collection(
-      firestore,
-      `projects/${docRef.id}/comentarios`
-    )
+    // Ahora que tienes el ID del proyecto, puedes agregar la subcolección 'comentarios'
+    const comentariosCollection = collection(firestore, `projects/${docRef.id}/comentarios`)
 
-    // Inicializar documentos predeterminados
-    await addDoc(bitacoraCollection, { info: 'Bitácora inicializada' })
-    await addDoc(informeCollection, { info: 'Informe inicializado' })
-    await addDoc(nominaCollection, { info: 'Nómina inicializada' })
-    
-    console.log('Inicializando comentarios...');
-    await addDoc(comentariosCollection, { info: 'Comentarios inicializada' });
-    console.log('Comentarios inicializado con éxito');
-    
+    // Puedes inicializar la subcolección con un comentario de ejemplo o dejarla vacía
+    await addDoc(comentariosCollection, {
+      titulo: 'Comentario inicial',
+      cuerpo: 'Este es un comentario inicial de prueba',
+      resuelto: false,
+    })
+
+    console.log('Proyecto creado con éxito y subcolección de comentarios inicializada.')
     return docRef.id
   } catch (error) {
     console.error('Error al crear el proyecto: ', error)
     throw error
   }
 }
+
 
 // Obtener todos los proyectos
 export const getAllProjects = async () => {
