@@ -9,27 +9,29 @@ import {
   Pressable,
 } from 'react-native'
 import { useRoute } from '@react-navigation/native'
+import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { getProjectById } from '../../Backend/services/ProjectoService'
 import {
   getCommentsByProjectId,
   updateComment,
 } from '../../Backend/services/CommentService' // Servicio para obtener los comentarios
-
+  
 export default function Proyecto() {
+  const navigation = useNavigation()
   const route = useRoute()
   const { id } = route.params
   const [project, setProject] = useState(null)
   const [loading, setLoading] = useState(true)
   const [comments, setComments] = useState([]) // Estado para los comentarios
   const [expandedComment, setExpandedComment] = useState(null) // Estado para el comentario expandido
-
+  
   useEffect(() => {
     const fetchProject = async () => {
       try {
         const fetchedProject = await getProjectById(id)
         setProject(fetchedProject)
-
+        
         // Obtener comentarios
         const fetchedComments = await getCommentsByProjectId(id)
         setComments(fetchedComments)
@@ -39,14 +41,18 @@ export default function Proyecto() {
         setLoading(false)
       }
     }
-
+    
     fetchProject()
   }, [id])
-
+  
   const toggleComment = (commentId) => {
     setExpandedComment(expandedComment === commentId ? null : commentId)
   }
 
+  const handleNavigateBitacora = () => {
+    navigation.navigate('Bitacora', { id: id });
+  };
+  
   const handleToggleResolved = async (commentId, currentComment) => {
     try {
       // Actualiza el estado de "resuelto" en el backend usando updateComment
@@ -64,12 +70,12 @@ export default function Proyecto() {
       
       // Hacemos la actualización en el backend
       await updateComment(id, commentId, updatedData)
-
+      
     } catch (error) {
       Alert.alert('Error', 'No se pudo actualizar el estado del comentario.')
     }
   }
-
+  
   if (loading) {
     return (
       <View className='flex-1 justify-center items-center bg-black'>
@@ -77,7 +83,7 @@ export default function Proyecto() {
       </View>
     )
   }
-
+  
   if (!project) {
     return (
       <View className='flex-1 justify-center items-center bg-black'>
@@ -85,7 +91,7 @@ export default function Proyecto() {
       </View>
     )
   }
-
+  
   return (
     <SafeAreaView className='flex-1 bg-black'>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} className='p-4'>
@@ -95,16 +101,16 @@ export default function Proyecto() {
             <Text className='text-white mt-1'>Número de Contrato: {project.contractNumber}</Text>
             <Text className='text-white'>Desde: {project.startDate} | Hasta: {project.endDate}</Text>
           </View>
-
+          
           <Image
             source={{ uri: project.image || 'https://via.placeholder.com/150' }}
             className='w-full h-64 rounded-lg'
             resizeMode='cover'
           />
-
+            
           {/* Botones de navegación */}
           <View className='mt-6 space-y-2'>
-            <Pressable className='bg-yellow-400 p-3 rounded-lg'>
+            <Pressable onPress={handleNavigateBitacora} className='bg-yellow-400 p-3 rounded-lg'>
               <Text className='text-center text-black font-semibold'>Bitácora</Text>
             </Pressable>
             <Pressable className='bg-yellow-500 p-3 rounded-lg'>
@@ -114,7 +120,7 @@ export default function Proyecto() {
               <Text className='text-center text-black font-semibold'>Nómina</Text>
             </Pressable>
           </View>
-
+            
           {/* Sección de comentarios */}
           <View className='space-y-2 p-2'>
             <Text className='text-center font-semibold text-yellow-500'>Comentarios del contratista</Text>
@@ -140,7 +146,7 @@ export default function Proyecto() {
                         <Text style={{ color: '#32CD32', fontSize: 12 }}>✔️</Text> // Muestra el visto si está resuelto
                       )}
                     </Pressable>
-
+                      
                     {/* Título del comentario con estado visual basado en "resuelto" */}
                     <Pressable onPress={() => toggleComment(comment.id)} style={{ flex: 1 }}>
                       <Text
@@ -154,7 +160,7 @@ export default function Proyecto() {
                       </Text>
                     </Pressable>
                   </View>
-
+                        
                   {/* Mostrar el cuerpo del comentario cuando esté expandido */}
                   {expandedComment === comment.id && (
                     <Text className='text-white mt-2'>
