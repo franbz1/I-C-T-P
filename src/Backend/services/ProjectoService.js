@@ -1,13 +1,14 @@
-// services/projectService.js
+//services\ProjectoService.js
 import { firestore } from '../../../firebase';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { deleteCollection } from "./utils";
 
+// Crear proyecto y subcolecciones (bitácora e informe)
 export const createProject = async (projectData) => {
   try {
       const projectsCollection = collection(firestore, 'projects');
       
-      // Asignar el link placeholder si no se proporciona un imageUrl
+      // Asignar un enlace placeholder si no se proporciona imageUrl
       const imageUrl = projectData.imageUrl ?? 'https://via.placeholder.com/150';
       
       const docRef = await addDoc(projectsCollection, {
@@ -15,22 +16,52 @@ export const createProject = async (projectData) => {
           projectName: projectData.projectName,
           startDate: Timestamp.fromDate(new Date(projectData.startDate)),
           endDate: Timestamp.fromDate(new Date(projectData.endDate)),
-          imageUrl: imageUrl, // Usar el link por defecto si está vacío o no definido
+          imageUrl: imageUrl, // Enlace por defecto si está vacío o no definido
       });
 
-      // Crear subcolecciones para bitacora, informe y nomina
+      // Crear subcolecciones para bitácora e informe dentro de projects
       const bitacoraCollection = collection(firestore, `projects/${docRef.id}/bitacora`);
       const informeCollection = collection(firestore, `projects/${docRef.id}/informe`);
-      const nominaCollection = collection(firestore, `projects/${docRef.id}/nomina`);
 
-      // Inicializar documentos predeterminados
-      await addDoc(bitacoraCollection, { info: 'Bitácora inicializada' });
-      await addDoc(informeCollection, { info: 'Informe inicializado' });
-      await addDoc(nominaCollection, { info: 'Nómina inicializada' });
+      // Inicializar documentos predeterminados en bitácora con fecha y detalles
+      await addDoc(bitacoraCollection, {
+          fecha: Timestamp.fromDate(new Date()), // Fecha actual
+          detalles: 'Bitácora inicializada' // Detalles iniciales
+      });
+
+      // Inicializar documentos predeterminados en informe con fecha y detalles
+      await addDoc(informeCollection, {
+          fecha: Timestamp.fromDate(new Date()), // Fecha actual
+          detalles: 'Informe inicializado' // Detalles iniciales
+      });
 
       return docRef.id;
   } catch (error) {
       console.error("Error al crear el proyecto: ", error);
+      throw error;
+  }
+};
+
+// Crear un registro en la colección independiente de nómina
+export const createNomina = async (nominaData) => {
+  try {
+      const nominaCollection = collection(firestore, 'nomina');
+      
+      // Añadir el registro de nómina con todos los campos necesarios
+      const docRef = await addDoc(nominaCollection, {
+          nombre: nominaData.nombre || 'Nombre predeterminado',
+          apellidos: nominaData.apellidos || 'Apellidos predeterminados',
+          correo: nominaData.correo || 'correo@example.com',
+          telefono: nominaData.telefono || '000-000-0000',
+          direccion: nominaData.direccion || 'Dirección predeterminada',
+          eps: nominaData.eps || 'EPS predeterminado',
+          contrasena: nominaData.contrasena || 'contraseña123',
+          cargo: nominaData.cargo || 'Cargo predeterminado',
+      });
+
+      return docRef.id;
+  } catch (error) {
+      console.error("Error al crear la nómina: ", error);
       throw error;
   }
 };
@@ -44,6 +75,19 @@ export const getAllProjects = async () => {
       return projectsList;
   } catch (error) {
       console.error("Error al obtener proyectos: ", error);
+      throw error;
+  }
+};
+
+// Obtener todos los registros de nómina
+export const getAllNomina = async () => {
+  try {
+      const nominaCollection = collection(firestore, 'nomina');
+      const nominaSnapshot = await getDocs(nominaCollection);
+      const nominaList = nominaSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      return nominaList;
+  } catch (error) {
+      console.error("Error al obtener la nómina: ", error);
       throw error;
   }
 };
@@ -64,7 +108,7 @@ export const getProjectById = async (projectId) => {
   }
 };
 
-//Actualiza un proyecto por su ID
+// Actualiza un proyecto por su ID
 export const updateProject = async (projectId, updatedData) => {
   try {
       const projectDoc = doc(firestore, 'projects', projectId);
@@ -81,13 +125,13 @@ export const updateProject = async (projectId, updatedData) => {
   }
 };
 
-//Elimina un proyecto por su ID
+// Elimina un proyecto por su ID
 export const deleteProject = async (projectId) => {
   try {
       const projectDoc = doc(firestore, 'projects', projectId);
 
-      // Eliminar subcolecciones (bitacora, informe, nomina)
-      const subcollections = ['bitacora', 'informe', 'nomina'];
+      // Eliminar subcolecciones (bitacora e informe)
+      const subcollections = ['bitacora', 'informe'];
       for (const sub of subcollections) {
           await deleteCollection(`projects/${projectId}/${sub}`);
       }
@@ -99,3 +143,4 @@ export const deleteProject = async (projectId) => {
       throw error;
   }
 };
+
