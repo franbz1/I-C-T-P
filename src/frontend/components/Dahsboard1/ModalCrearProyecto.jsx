@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, TextInput, Modal, Alert } from 'react-native';
 import DateTimePicker from 'react-native-modal-datetime-picker';
-import { createProject } from '../../Backend/services/ProjectoService';
+import { createProject } from '../../../Backend/services/ProjectoService';
 
 export default function ModalCrearProyecto({
   visible,

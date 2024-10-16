@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Alert, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getAllProjects, deleteProject, createProject, subscribeToProjects } from '../../Backend/services/ProjectoService';
-import ProjectCard from '../components/projectCard';
-import AddProjectCard from '../components/AddProjectCard';
-import ModalCrearProyecto from '../components/ModalCrearProyecto';
+import ProjectCard from '../components/Dahsboard1/projectCard';
+import AddProjectCard from '../components/Dahsboard1/AddProjectCard';
+import ModalCrearProyecto from '../components/Dahsboard1/ModalCrearProyecto';
 import BarraOpciones from '../components/BarraOpciones';
 
 export default function DashBoard1() {

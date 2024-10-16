@@ -3,10 +3,10 @@ import { View, FlatList, ActivityIndicator, Alert } from 'react-native'
 import { useRoute } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { getBitacoraEntries, createBitacoraEntry } from '../../Backend/services/BitacoraService'
-import BitacoraEntry from '../components/BitacoraEntry'
-import EmptyBitacora from '../components/EmptyBitacora'
+import BitacoraEntry from '../components/Bitacora/BitacoraEntry'
+import EmptyBitacora from '../components/Bitacora/EmptyBitacora'
 import BarraOpciones from '../components/BarraOpciones'
-import BotonAgregarBitacora from '../components/BotonAgregarBitacora';
+import BotonAgregarBitacora from '../components/Bitacora/BotonAgregarBitacora';
 
 export default function Bitacora() {
   const route = useRoute()

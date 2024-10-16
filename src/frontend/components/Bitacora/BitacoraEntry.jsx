@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, ScrollView, Image, TouchableOpacity, Alert } from 'react-native';
 import ImageViewing from 'react-native-image-viewing'; // Importar la librería
-import { deleteBitacoraEntry } from '../../Backend/services/BitacoraService'; // Importar el servicio para eliminar la entrada
+import { deleteBitacoraEntry } from '../../../Backend/services/BitacoraService'; // Importar el servicio para eliminar la entrada
 
 export default function BitacoraEntry({ item, expandedEntry, toggleEntry, projectId, onEntryDeleted }) {
   const [isImageViewVisible, setIsImageViewVisible] = useState(false);

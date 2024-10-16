@@ -12,8 +12,8 @@ import { useRoute } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getProjectById } from '../../Backend/services/ProjectoService';
 import BarraOpciones from '../components/BarraOpciones';
-import BotonNavegacionProyecto from '../components/BotonNavegacionProyecto';
-import Comentarios from '../components/Comentarios';
+import BotonNavegacionProyecto from '../components/Proyecto/BotonNavegacionProyecto';
+import Comentarios from '../components/Proyecto/Comentarios';
 
 export default function Proyecto() {
   const route = useRoute();

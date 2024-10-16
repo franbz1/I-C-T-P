@@ -8,9 +8,8 @@ import {
 } from 'react-native';
 import {
   subscribeToComentarios,
-  createComentario,
   updateComentario,
-} from '../../Backend/services/CommentService';
+} from '../../../Backend/services/CommentService';
 
 const Comentarios = ({ projectId }) => {
   const [comments, setComments] = useState([]);
