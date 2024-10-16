@@ -6,143 +6,180 @@ import { initializeFirebase } from './firebase.js'; // Importar la función de i
 const openDatabaseAsync = async () => {
   const db = await SQLite.openDatabaseAsync('localData');
   
-  // Crear tabla empleados (como nomina)
+  // Activar el journal_mode a WAL para mejorar el rendimiento
+  await db.execAsync(`PRAGMA journal_mode = WAL;`);
+
+  // Crear tabla Proyecto
   await db.execAsync(`
-    PRAGMA journal_mode = WAL;
-    CREATE TABLE IF NOT EXISTS nomina (
-      id INTEGER PRIMARY KEY NOT NULL,
-      nombres TEXT NOT NULL,
-      apellidos TEXT NOT NULL,
-      correo TEXT NOT NULL UNIQUE,
-      telefono TEXT NOT NULL,
-      direccion TEXT NOT NULL,
-      eps TEXT DEFAULT 'N/A',
-      contraseña TEXT NOT NULL,
-      cargo TEXT NOT NULL
+    CREATE TABLE IF NOT EXISTS Proyecto (
+      ProyectoID INTEGER PRIMARY KEY NOT NULL,
+      Nombre TEXT NOT NULL,
+      Contrato TEXT UNIQUE NOT NULL,
+      FechaInicio TEXT NOT NULL,
+      FechaFin TEXT NOT NULL,
+      Imagen TEXT
     );
   `);
 
-  // Crear tabla bitacora
+  // Crear tabla Empleado
   await db.execAsync(`
-    CREATE TABLE IF NOT EXISTS bitacora (
-      id INTEGER PRIMARY KEY NOT NULL,
-      empleadoId INTEGER,
-      fecha TEXT NOT NULL,
-      detalles TEXT NOT NULL,
-      FOREIGN KEY (empleadoId) REFERENCES nomina (id)
+    CREATE TABLE IF NOT EXISTS Empleado (
+      EmpleadoID INTEGER PRIMARY KEY NOT NULL,
+      Cedula INTEGER UNIQUE NOT NULL,
+      Nombres TEXT NOT NULL,
+      Apellidos TEXT NOT NULL,
+      Correo TEXT UNIQUE NOT NULL,
+      Telefono INTEGER UNIQUE NOT NULL,
+      Direccion TEXT NOT NULL,
+      SeguroLaboral TEXT NOT NULL,
+      EPS TEXT NOT NULL,
+      TipoSangineo TEXT NOT NULL,
+      Cargo TEXT NOT NULL,
+      Foto TEXT
     );
   `);
 
-  // Crear tabla informe
+  // Crear tabla Empleado_Proyecto (relación entre Empleado y Proyecto)
   await db.execAsync(`
-    CREATE TABLE IF NOT EXISTS informe (
-      id INTEGER PRIMARY KEY NOT NULL,
-      empleadoId INTEGER,
-      fecha TEXT NOT NULL,
-      detalles TEXT NOT NULL,
-      FOREIGN KEY (empleadoId) REFERENCES nomina (id)
+    CREATE TABLE IF NOT EXISTS Empleado_Proyecto (
+      EmpleadoID INTEGER NOT NULL,
+      ProyectoID INTEGER NOT NULL,
+      FechaAsignacion TEXT NOT NULL,
+      PRIMARY KEY (EmpleadoID, ProyectoID),
+      FOREIGN KEY (EmpleadoID) REFERENCES Empleado (EmpleadoID),
+      FOREIGN KEY (ProyectoID) REFERENCES Proyecto (ProyectoID)
     );
   `);
 
-  // Crear tabla proyectos
+  // Crear tabla EntradaBitacora
   await db.execAsync(`
-    CREATE TABLE IF NOT EXISTS proyectos (
-      id INTEGER PRIMARY KEY NOT NULL,
-      nombreProyecto TEXT NOT NULL,
-      contractNumber TEXT NOT NULL,
-      startDate TEXT NOT NULL,
-      endDate TEXT NOT NULL
+    CREATE TABLE IF NOT EXISTS EntradaBitacora (
+      BitacoraID INTEGER PRIMARY KEY NOT NULL,
+      ProyectoID INTEGER NOT NULL,
+      Fecha TEXT NOT NULL,
+      Detalles TEXT NOT NULL,
+      FOREIGN KEY (ProyectoID) REFERENCES Proyecto (ProyectoID)
+    );
+  `);
+
+  // Crear tabla FotosBitacora
+  await db.execAsync(`
+    CREATE TABLE IF NOT EXISTS FotosBitacora (
+      FotoID INTEGER PRIMARY KEY NOT NULL,
+      BitacoraID INTEGER NOT NULL,
+      Url TEXT NOT NULL,
+      FOREIGN KEY (BitacoraID) REFERENCES EntradaBitacora (BitacoraID)
+    );
+  `);
+
+  // Crear tabla Informe
+  await db.execAsync(`
+    CREATE TABLE IF NOT EXISTS Informe (
+      InformeID INTEGER PRIMARY KEY NOT NULL,
+      ProyectoID INTEGER NOT NULL,
+      Detalles TEXT NOT NULL,
+      FOREIGN KEY (ProyectoID) REFERENCES Proyecto (ProyectoID)
+    );
+  `);
+
+  // Crear tabla FotosInforme
+  await db.execAsync(`
+    CREATE TABLE IF NOT EXISTS FotosInforme (
+      FotoID INTEGER PRIMARY KEY NOT NULL,
+      InformeID INTEGER NOT NULL,
+      Url TEXT NOT NULL,
+      FOREIGN KEY (InformeID) REFERENCES Informe (InformeID)
+    );
+  `);
+
+  // Crear tabla ComentarioContratista
+  await db.execAsync(`
+    CREATE TABLE IF NOT EXISTS ComentarioContratista (
+      ComentarioID INTEGER PRIMARY KEY NOT NULL,
+      ProyectoID INTEGER NOT NULL,
+      Titulo TEXT NOT NULL,
+      Detalles TEXT NOT NULL,
+      Resuelto INTEGER NOT NULL CHECK (Resuelto IN (0, 1)),
+      FechaComentario TEXT NOT NULL,
+      FechaResuelto TEXT,
+      FOREIGN KEY (ProyectoID) REFERENCES Proyecto (ProyectoID)
     );
   `);
 
   return db;
 };
 
-// Sincronizar Firebase con SQLite (Nómina, Bitácora, Informe, Proyectos)
+// Sincronizar Firebase con SQLite (Empleado, Proyecto, EntradaBitacora, Informe, etc.)
 const syncFirebaseToSQLite = async (db) => {
-  // Sincronizar nomina (empleados)
-  const nominaSnapshot = await firestore().collection('nomina').get();
-  nominaSnapshot.forEach(async (doc) => {
+  // Sincronizar empleados
+  const empleadosSnapshot = await firestore().collection('empleado').get();
+  empleadosSnapshot.forEach(async (doc) => {
     const empleado = doc.data();
     await db.runAsync(
-      'INSERT OR IGNORE INTO nomina (nombres, apellidos, correo, telefono, direccion, eps, contraseña, cargo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      empleado.nombres, empleado.apellidos, empleado.correo, empleado.telefono, empleado.direccion, empleado.eps, empleado.contraseña, empleado.cargo
-    );
-  });
-
-  // Sincronizar bitácora
-  const bitacoraSnapshot = await firestore().collection('bitacora').get();
-  bitacoraSnapshot.forEach(async (doc) => {
-    const bitacora = doc.data();
-    await db.runAsync(
-      'INSERT OR IGNORE INTO bitacora (empleadoId, fecha, detalles) VALUES (?, ?, ?)',
-      bitacora.empleadoId, bitacora.fecha, bitacora.detalles
-    );
-  });
-
-  // Sincronizar informe
-  const informeSnapshot = await firestore().collection('informe').get();
-  informeSnapshot.forEach(async (doc) => {
-    const informe = doc.data();
-    await db.runAsync(
-      'INSERT OR IGNORE INTO informe (empleadoId, fecha, detalles) VALUES (?, ?, ?)',
-      informe.empleadoId, informe.fecha, informe.detalles
+      'INSERT OR IGNORE INTO Empleado (Cedula, Nombres, Apellidos, Correo, Telefono, Direccion, SeguroLaboral, EPS, TipoSangineo, Cargo, Foto) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      empleado.Cedula, empleado.Nombres, empleado.Apellidos, empleado.Correo, empleado.Telefono, empleado.Direccion, empleado.SeguroLaboral, empleado.EPS, empleado.TipoSangineo, empleado.Cargo, empleado.Foto
     );
   });
 
   // Sincronizar proyectos
-  const proyectosSnapshot = await firestore().collection('proyectos').get();
+  const proyectosSnapshot = await firestore().collection('proyecto').get();
   proyectosSnapshot.forEach(async (doc) => {
     const proyecto = doc.data();
     await db.runAsync(
-      'INSERT OR IGNORE INTO proyectos (nombreProyecto, contractNumber, startDate, endDate) VALUES (?, ?, ?, ?)',
-      proyecto.nombreProyecto, proyecto.contractNumber, proyecto.startDate, proyecto.endDate
+      'INSERT OR IGNORE INTO Proyecto (Nombre, Contrato, FechaInicio, FechaFin, Imagen) VALUES (?, ?, ?, ?, ?)',
+      proyecto.Nombre, proyecto.Contrato, proyecto.FechaInicio, proyecto.FechaFin, proyecto.Imagen
     );
   });
+
+  // Sincronizar más tablas según sea necesario (Empleado_Proyecto, EntradaBitacora, etc.)
+  // ...
 };
 
-// Insertar empleado en Firebase (nómina) y SQLite
-const insertarEmpleado = async (db, nombres, apellidos, correo, telefono, direccion, eps, contraseña, cargo) => {
+// Insertar empleado en Firebase y SQLite
+const insertarEmpleado = async (db, cedula, nombres, apellidos, correo, telefono, direccion, seguroLaboral, eps, tipoSangineo, cargo, foto) => {
   const result = await db.runAsync(
-    'INSERT INTO nomina (nombres, apellidos, correo, telefono, direccion, eps, contraseña, cargo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-    nombres, apellidos, correo, telefono, direccion, eps, contraseña, cargo
+    'INSERT INTO Empleado (Cedula, Nombres, Apellidos, Correo, Telefono, Direccion, SeguroLaboral, EPS, TipoSangineo, Cargo, Foto) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    cedula, nombres, apellidos, correo, telefono, direccion, seguroLaboral, eps, tipoSangineo, cargo, foto
   );
 
-  await firestore().collection('nomina').add({
-    nombres,
-    apellidos,
-    correo,
-    telefono,
-    direccion,
-    eps,
-    contraseña,
-    cargo,
+  await firestore().collection('empleado').add({
+    Cedula: cedula,
+    Nombres: nombres,
+    Apellidos: apellidos,
+    Correo: correo,
+    Telefono: telefono,
+    Direccion: direccion,
+    SeguroLaboral: seguroLaboral,
+    EPS: eps,
+    TipoSangineo: tipoSangineo,
+    Cargo: cargo,
+    Foto: foto,
   });
 
   return result.lastInsertRowId;
 };
 
-// Obtener empleado desde SQLite
+// Obtener empleado por correo y contraseña desde SQLite
 const obtenerEmpleadoPorCorreoYContraseña = async (db, correo, contraseña) => {
-  const empleado = await db.getFirstAsync('SELECT * FROM nomina WHERE correo = ? AND contraseña = ?', correo, contraseña);
+  const empleado = await db.getFirstAsync('SELECT * FROM Empleado WHERE Correo = ? AND contraseña = ?', correo, contraseña);
   return empleado;
 };
 
 // Obtener bitácora por empleado ID
 const obtenerBitacoraPorEmpleadoId = async (db, empleadoId) => {
-  const bitacora = await db.allAsync('SELECT * FROM bitacora WHERE empleadoId = ?', empleadoId);
+  const bitacora = await db.allAsync('SELECT * FROM EntradaBitacora WHERE ProyectoID = ?', empleadoId);
   return bitacora;
 };
 
-// Obtener informe por empleado ID
-const obtenerInformePorEmpleadoId = async (db, empleadoId) => {
-  const informe = await db.allAsync('SELECT * FROM informe WHERE empleadoId = ?', empleadoId);
+// Obtener informe por proyecto ID
+const obtenerInformePorProyectoId = async (db, proyectoId) => {
+  const informe = await db.allAsync('SELECT * FROM Informe WHERE ProyectoID = ?', proyectoId);
   return informe;
 };
 
 // Obtener proyecto por ID
 const obtenerProyectoPorId = async (db, proyectoId) => {
-  const proyecto = await db.getFirstAsync('SELECT * FROM proyectos WHERE id = ?', proyectoId);
+  const proyecto = await db.getFirstAsync('SELECT * FROM Proyecto WHERE ProyectoID = ?', proyectoId);
   return proyecto;
 };
 
@@ -160,7 +197,7 @@ export {
   insertarEmpleado,
   obtenerEmpleadoPorCorreoYContraseña,
   obtenerBitacoraPorEmpleadoId,
-  obtenerInformePorEmpleadoId,
+  obtenerInformePorProyectoId,
   obtenerProyectoPorId,
   setupDatabase
 };
