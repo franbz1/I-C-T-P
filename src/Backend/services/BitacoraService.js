@@ -1,59 +1,87 @@
-import { firestore } from '../../../firebase'
-import { collection, doc, addDoc, getDocs, updateDoc, deleteDoc } from 'firebase/firestore'
+// services/bitacoraService.js
+import { firestore } from '../../../firebase';
+import { collection, Timestamp, doc, addDoc, getDocs, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 
-// Obtener todos los comentarios de un proyecto
-export const getBitacoraEntriesByProjectId = async (projectId) => {
+// Helper para convertir fechas de Timestamp de Firebase a JavaScript Date
+const convertTimestampToDate = (timestamp) => {
+  return timestamp instanceof Timestamp
+    ? new Date(timestamp.seconds * 1000)
+    : new Date(timestamp);
+};
+
+// Crear una entrada de bitácora para un proyecto específico
+export const createBitacoraEntry = async (projectId, bitacoraData) => {
   try {
-    const entriesCollection = collection(firestore, `projects/${projectId}/bitacora`)
-    const entriesSnapshot = await getDocs(entriesCollection)
-    const entriesList = entriesSnapshot.docs.map((doc) => ({
+    const bitacoraCollection = collection(firestore, `Proyectos/${projectId}/EntradaBitacora`);
+    const bitacoraRef = await addDoc(bitacoraCollection, {
+      Fecha: Timestamp.fromDate(new Date(bitacoraData.fecha)), // Convertir fecha a Timestamp
+      Detalles: bitacoraData.detalles,
+    });
+
+    console.log('Entrada de bitácora creada con éxito.');
+    return bitacoraRef.id;
+  } catch (error) {
+    console.error('Error al crear la entrada de bitácora: ', error);
+    throw error;
+  }
+};
+
+// Obtener todas las entradas de bitácora de un proyecto
+export const getBitacoraEntries = async (projectId) => {
+  try {
+    const bitacoraCollection = collection(firestore, `Proyectos/${projectId}/EntradaBitacora`);
+    const bitacoraSnapshot = await getDocs(bitacoraCollection);
+    const bitacoraList = bitacoraSnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
-    }))
-    return entriesList
+      Fecha: convertTimestampToDate(doc.data().Fecha), // Convertir Timestamp a Date
+    }));
+    return bitacoraList;
   } catch (error) {
-    console.error('Error al obtener entradas en bitacora: ', error)
-    throw error
+    console.error('Error al obtener las entradas de bitácora: ', error);
+    throw error;
   }
-}
+};
 
-// Actualizar un comentario específico
-export const updateComment = async (projectId, commentId, updatedData) => {
+// Obtener una entrada específica de bitácora por su ID
+export const getBitacoraEntryById = async (projectId, bitacoraId) => {
   try {
-    const commentDoc = doc(firestore, `projects/${projectId}/comentarios`, commentId)
-    await updateDoc(commentDoc, {
-      resuelto: updatedData.resuelto,
-      titulo: updatedData.titulo,
-      cuerpo: updatedData.cuerpo,
-    })
+    const bitacoraDoc = doc(firestore, `Proyectos/${projectId}/EntradaBitacora`, bitacoraId);
+    const bitacoraSnapshot = await getDoc(bitacoraDoc);
+    if (bitacoraSnapshot.exists()) {
+      return { id: bitacoraSnapshot.id, ...bitacoraSnapshot.data(), Fecha: convertTimestampToDate(bitacoraSnapshot.data().Fecha) };
+    } else {
+      throw new Error('Entrada de bitácora no encontrada');
+    }
   } catch (error) {
-    console.error('Error al actualizar el comentario: ', error)
-    throw error
+    console.error('Error al obtener la entrada de bitácora: ', error);
+    throw error;
   }
-}
+};
 
-// Eliminar un comentario específico
-export const deleteComment = async (projectId, commentId) => {
+// Actualizar una entrada de bitácora
+export const updateBitacoraEntry = async (projectId, bitacoraId, updatedData) => {
   try {
-    const commentDoc = doc(firestore, `projects/${projectId}/comentarios`, commentId)
-    await deleteDoc(commentDoc)
+    const bitacoraDoc = doc(firestore, `Proyectos/${projectId}/EntradaBitacora`, bitacoraId);
+    await updateDoc(bitacoraDoc, {
+      Fecha: Timestamp.fromDate(new Date(updatedData.fecha)), // Convertir fecha a Timestamp
+      Detalles: updatedData.detalles,
+    });
+    console.log('Entrada de bitácora actualizada con éxito.');
   } catch (error) {
-    console.error('Error al eliminar el comentario: ', error)
-    throw error
+    console.error('Error al actualizar la entrada de bitácora: ', error);
+    throw error;
   }
-}
+};
 
-// Agregar un nuevo comentario a un proyecto
-export const addComment = async (projectId, commentData) => {
+// Eliminar una entrada de bitácora
+export const deleteBitacoraEntry = async (projectId, bitacoraId) => {
   try {
-    const commentsCollection = collection(firestore, `projects/${projectId}/comentarios`)
-    await addDoc(commentsCollection, {
-      titulo: commentData.titulo,
-      cuerpo: commentData.cuerpo,
-      resuelto: commentData.resuelto || false,
-    })
+    const bitacoraDoc = doc(firestore, `Proyectos/${projectId}/EntradaBitacora`, bitacoraId);
+    await deleteDoc(bitacoraDoc);
+    console.log('Entrada de bitácora eliminada con éxito.');
   } catch (error) {
-    console.error('Error al agregar el comentario: ', error)
-    throw error
+    console.error('Error al eliminar la entrada de bitácora: ', error);
+    throw error;
   }
-}
+};

@@ -1,59 +1,125 @@
-import { firestore } from '../../../firebase'
-import { collection, doc, addDoc, getDocs, updateDoc, deleteDoc } from 'firebase/firestore'
+// services/comentarioService.js
+import { firestore } from '../../../firebase';
+import {
+  collection,
+  Timestamp,
+  doc,
+  addDoc,
+  getDocs,
+  getDoc,
+  updateDoc,
+  deleteDoc,
+  onSnapshot,
+} from 'firebase/firestore';
+
+// Crear un comentario
+export const createComentario = async (projectId, comentarioData) => {
+  try {
+    const comentariosCollection = collection(firestore, `Proyectos/${projectId}/ComentarioContratista`);
+
+    const comentario = {
+      ProyectoID: projectId,
+      Titulo: comentarioData.titulo,
+      Detalles: comentarioData.detalles,
+      Resuelto: comentarioData.resuelto || false,
+      FechaComentario: Timestamp.fromDate(new Date(comentarioData.fechaComentario)),
+      FechaResuelto: comentarioData.fechaResuelto ? Timestamp.fromDate(new Date(comentarioData.fechaResuelto)) : null,
+    };
+
+    const comentarioRef = await addDoc(comentariosCollection, comentario);
+    console.log('Comentario creado con éxito:', comentarioRef.id);
+    return comentarioRef.id;
+  } catch (error) {
+    console.error('Error al crear el comentario:', error);
+    throw new Error('No se pudo crear el comentario');
+  }
+};
 
 // Obtener todos los comentarios de un proyecto
-export const getCommentsByProjectId = async (projectId) => {
+export const getComentarios = async (projectId) => {
   try {
-    const commentsCollection = collection(firestore, `projects/${projectId}/comentarios`)
-    const commentsSnapshot = await getDocs(commentsCollection)
-    const commentsList = commentsSnapshot.docs.map((doc) => ({
-      id: doc.id,
+    const comentariosCollection = collection(firestore, `Proyectos/${projectId}/ComentarioContratista`);
+    const comentariosSnapshot = await getDocs(comentariosCollection);
+
+    const comentariosList = comentariosSnapshot.docs.map(doc => ({
+      ComentarioID: doc.id,
+      ProyectoID: projectId,
       ...doc.data(),
-    }))
-    return commentsList
+    }));
+    
+    return comentariosList;
   } catch (error) {
-    console.error('Error al obtener comentarios: ', error)
-    throw error
+    console.error('Error al obtener los comentarios:', error);
+    throw new Error('No se pudieron obtener los comentarios');
   }
-}
+};
 
-// Actualizar un comentario específico
-export const updateComment = async (projectId, commentId, updatedData) => {
+// Obtener un comentario por su ID
+export const getComentarioById = async (projectId, comentarioId) => {
   try {
-    const commentDoc = doc(firestore, `projects/${projectId}/comentarios`, commentId)
-    await updateDoc(commentDoc, {
-      resuelto: updatedData.resuelto,
-      titulo: updatedData.titulo,
-      cuerpo: updatedData.cuerpo,
-    })
-  } catch (error) {
-    console.error('Error al actualizar el comentario: ', error)
-    throw error
-  }
-}
+    const comentarioDoc = doc(firestore, `Proyectos/${projectId}/ComentarioContratista`, comentarioId);
+    const comentarioSnapshot = await getDoc(comentarioDoc);
+    
+    if (!comentarioSnapshot.exists()) {
+      throw new Error('Comentario no encontrado');
+    }
 
-// Eliminar un comentario específico
-export const deleteComment = async (projectId, commentId) => {
-  try {
-    const commentDoc = doc(firestore, `projects/${projectId}/comentarios`, commentId)
-    await deleteDoc(commentDoc)
+    return { ComentarioID: comentarioSnapshot.id, ProyectoID: projectId, ...comentarioSnapshot.data() };
   } catch (error) {
-    console.error('Error al eliminar el comentario: ', error)
-    throw error
+    console.error('Error al obtener el comentario:', error);
+    throw new Error('No se pudo obtener el comentario');
   }
-}
+};
 
-// Agregar un nuevo comentario a un proyecto
-export const addComment = async (projectId, commentData) => {
+// Actualizar un comentario
+export const updateComentario = async (projectId, comentarioId, updatedData) => {
   try {
-    const commentsCollection = collection(firestore, `projects/${projectId}/comentarios`)
-    await addDoc(commentsCollection, {
-      titulo: commentData.titulo,
-      cuerpo: commentData.cuerpo,
-      resuelto: commentData.resuelto || false,
-    })
+    const comentarioDoc = doc(firestore, `Proyectos/${projectId}/ComentarioContratista`, comentarioId);
+    
+    const updatedComentario = {
+      Titulo: updatedData.Titulo || updatedData.titulo,
+      Detalles: updatedData.Detalles || updatedData.detalles,
+      Resuelto: updatedData.Resuelto !== undefined ? updatedData.Resuelto : updatedData.resuelto,
+      FechaResuelto: updatedData.FechaResuelto ? Timestamp.fromDate(new Date(updatedData.FechaResuelto)) : null,
+    };
+
+    await updateDoc(comentarioDoc, updatedComentario);
+    console.log('Comentario actualizado con éxito:', comentarioId);
   } catch (error) {
-    console.error('Error al agregar el comentario: ', error)
-    throw error
+    console.error('Error al actualizar el comentario:', error);
+    throw new Error('No se pudo actualizar el comentario');
   }
-}
+};
+
+// Eliminar un comentario
+export const deleteComentario = async (projectId, comentarioId) => {
+  try {
+    const comentarioDoc = doc(firestore, `Proyectos/${projectId}/ComentarioContratista`, comentarioId);
+    
+    await deleteDoc(comentarioDoc);
+    console.log('Comentario eliminado con éxito:', comentarioId);
+  } catch (error) {
+    console.error('Error al eliminar el comentario:', error);
+    throw new Error('No se pudo eliminar el comentario');
+  }
+};
+
+// Suscribirse a los comentarios de un proyecto en tiempo real
+export const subscribeToComentarios = (projectId, callback) => {
+  const comentariosCollection = collection(firestore, `Proyectos/${projectId}/ComentarioContratista`);
+
+  // Establecer el listener
+  const unsubscribe = onSnapshot(comentariosCollection, (snapshot) => {
+    const comentariosList = snapshot.docs.map(doc => ({
+      ComentarioID: doc.id,
+      ProyectoID: projectId,
+      ...doc.data(),
+    }));
+    callback(comentariosList);
+  }, (error) => {
+    console.error('Error al obtener los comentarios en tiempo real:', error);
+  });
+
+  // Retornar la función de desuscripción
+  return unsubscribe;
+};
