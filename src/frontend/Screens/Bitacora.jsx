@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import { View, FlatList, ActivityIndicator, Alert } from 'react-native'
+import { useRoute } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { getBitacoraEntries, createBitacoraEntry } from '../../Backend/services/BitacoraService'
 import BitacoraEntry from '../components/BitacoraEntry'
 import EmptyBitacora from '../components/EmptyBitacora'
 import BarraOpciones from '../components/BarraOpciones'
 
-export default function Bitacora({ route }) {
-  const { projectId } = route.params
+export default function Bitacora() {
+  const route = useRoute()
+  const { id } = route.params
   const [entries, setEntries] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -22,25 +24,28 @@ export default function Bitacora({ route }) {
             'Realizamos una inspección del terreno y se encontró un problema con la maquinaria.',
           fotos: [
             'https://picsum.photos/seed/a1/900/900',
-            'https://picsum.photos/seed/a2/900/900',
+            'https://picsum.photos/seed/a3/900/900',
           ],
+          empleados: ['empleado1', 'empleado2'], // IDs de empleados
         },
         {
           fecha: new Date(2024, 1, 13), // Fecha 13 de febrero de 2024
           detalles:
             'El equipo instaló las primeras bases estructurales y continuó con la nivelación del suelo.',
           fotos: ['https://picsum.photos/seed/a3/900/900'],
+          empleados: ['empleado2', 'empleado3'], // IDs de empleados
         },
         {
           fecha: new Date(2024, 1, 14), // Fecha 14 de febrero de 2024
           detalles:
             'Se avanzó en la construcción del sistema de drenaje, todo el equipo en sitio trabajando.',
           fotos: [],
+          empleados: ['empleado1', 'empleado3'], // IDs de empleados
         },
-      ]
+      ];
 
-      for (const entry of testEntries) {
-        await createBitacoraEntry(projectId, entry) // Crear cada entrada usando el servicio
+      for (const entry of testEntries) {        
+        await createBitacoraEntry(id, entry) // Crear cada entrada usando el servicio
         console.log(
           `Entrada de bitácora para ${entry.fecha.toDateString()} creada con éxito.`
         )
@@ -55,7 +60,7 @@ export default function Bitacora({ route }) {
   useEffect(() => {
     const fetchEntries = async () => {
       try {
-        const fetchedEntries = await getBitacoraEntries(projectId)
+        const fetchedEntries = await getBitacoraEntries(id)
         setEntries(fetchedEntries)
       } catch (err) {
         setError(err)
@@ -69,11 +74,16 @@ export default function Bitacora({ route }) {
     }
 
     fetchEntries()
-  }, [projectId])
+  }, [id])
 
   const toggleEntry = (entryId) => {
     setExpandedEntry(expandedEntry === entryId ? null : entryId)
   }
+
+  const handleEntryDeleted = (deletedEntryId) => {
+    setEntries(entries.filter(entry => entry.id !== deletedEntryId));
+    Alert.alert('Éxito', 'Entrada eliminada correctamente.');
+  };
 
   if (loading) {
     return (
@@ -107,6 +117,8 @@ export default function Bitacora({ route }) {
             item={item}
             expandedEntry={expandedEntry}
             toggleEntry={toggleEntry}
+            projectId={id}
+            onEntryDeleted={handleEntryDeleted}
           />
         )}
         contentContainerStyle={{ padding: 16 }}

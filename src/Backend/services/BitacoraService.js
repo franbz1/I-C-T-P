@@ -4,18 +4,24 @@ import { collection, Timestamp, doc, addDoc, getDocs, getDoc, updateDoc, deleteD
 
 // Helper para convertir fechas de Timestamp de Firebase a JavaScript Date
 const convertTimestampToDate = (timestamp) => {
-  return timestamp instanceof Timestamp
-    ? new Date(timestamp.seconds * 1000)
-    : new Date(timestamp);
+  return timestamp instanceof Timestamp ? new Date(timestamp.seconds * 1000) : new Date(timestamp);
 };
 
 // Crear una entrada de bitácora para un proyecto específico
 export const createBitacoraEntry = async (projectId, bitacoraData) => {
   try {
     const bitacoraCollection = collection(firestore, `Proyectos/${projectId}/EntradaBitacora`);
+    
+    // Verificar que el array de IDs de empleados no sea null o vacío
+    if (!bitacoraData.empleados || bitacoraData.empleados.length === 0) {
+      throw new Error('El array de IDs de empleados no puede estar vacío.');
+    }
+    
     const bitacoraRef = await addDoc(bitacoraCollection, {
       Fecha: Timestamp.fromDate(new Date(bitacoraData.fecha)), // Convertir fecha a Timestamp
       Detalles: bitacoraData.detalles,
+      Fotos: bitacoraData.fotos || [], // Asegurar que sea un array, aunque sea vacío
+      Empleados: bitacoraData.empleados, // Asegurar que tiene un array de IDs de empleados
     });
 
     console.log('Entrada de bitácora creada con éxito.');
@@ -66,6 +72,8 @@ export const updateBitacoraEntry = async (projectId, bitacoraId, updatedData) =>
     await updateDoc(bitacoraDoc, {
       Fecha: Timestamp.fromDate(new Date(updatedData.fecha)), // Convertir fecha a Timestamp
       Detalles: updatedData.detalles,
+      Fotos: updatedData.fotos || [],
+      Empleados: updatedData.empleados, // Asegurar que se actualizan los IDs de empleados
     });
     console.log('Entrada de bitácora actualizada con éxito.');
   } catch (error) {
