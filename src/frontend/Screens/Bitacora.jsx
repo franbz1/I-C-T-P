@@ -6,6 +6,7 @@ import { getBitacoraEntries, createBitacoraEntry } from '../../Backend/services/
 import BitacoraEntry from '../components/BitacoraEntry'
 import EmptyBitacora from '../components/EmptyBitacora'
 import BarraOpciones from '../components/BarraOpciones'
+import BotonAgregarBitacora from '../components/BotonAgregarBitacora';
 
 export default function Bitacora() {
   const route = useRoute()
@@ -44,7 +45,8 @@ export default function Bitacora() {
         },
       ];
 
-      for (const entry of testEntries) {        
+      for (const entry of testEntries) {   
+        console.log(entry);
         await createBitacoraEntry(id, entry) // Crear cada entrada usando el servicio
         console.log(
           `Entrada de bitácora para ${entry.fecha.toDateString()} creada con éxito.`
@@ -109,6 +111,7 @@ export default function Bitacora() {
   return (
     <SafeAreaView className='flex-1 bg-black'>
       <BarraOpciones btnDev={loadTestBitacoraEntries}/>
+      <BotonAgregarBitacora id={id} />
       <FlatList
         data={entries}
         keyExtractor={(item) => item.id}
