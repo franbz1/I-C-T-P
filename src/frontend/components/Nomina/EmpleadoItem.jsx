@@ -26,6 +26,9 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
     setEditedEmpleado({ ...editedEmpleado, [key]: value })
   }
 
+  url = empleado.Foto ? empleado.Foto : 'https://via.placeholder.com/150'
+  
+
   return (
     <View className='mb-2 bg-neutral-900 rounded-lg shadow'>
       <TouchableOpacity
@@ -34,7 +37,7 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
         activeOpacity={0.7}
       >
         <Text className='text-lg text-yellow-400 font-semibold'>
-          {empleado.nombre}
+          {empleado.Nombres}
         </Text>
         {expandedId === empleado.id ? (
           <ChevronUpIcon
@@ -51,7 +54,7 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
       <Collapsible collapsed={expandedId !== empleado.id}>
         <View className='p-4 border-t border-[#facc15]'>
           <Image
-            source={{ uri: empleado.foto }}
+            source={{uri: url}}
             className='w-24 h-24 rounded-full mb-4 self-center'
           />
 
@@ -60,14 +63,14 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
             <Text className='font-semibold text-yellow-400'>CC: </Text>
             {isEditing ? (
               <TextInput
-                value={editedEmpleado.cc}
+                value={editedEmpleado.Cedula}
                 onChangeText={(text) => handleInputChange('cc', text)}
                 className='text-white mb-2 flex-1 border-b border-yellow-400'
                 placeholder='Número de CC'
                 placeholderTextColor='#facc15'
               />
             ) : (
-              <Text className='text-white mb-2'>{empleado.cc}</Text>
+              <Text className='text-white mb-2'>{empleado.Cedula}</Text>
             )}
           </View>
 
@@ -83,7 +86,7 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
                 placeholderTextColor='#facc15'
               />
             ) : (
-              <Text className='text-white mb-2'>{empleado.correo}</Text>
+              <Text className='text-white mb-2'>{empleado.Correo}</Text>
             )}
           </View>
 
@@ -99,7 +102,7 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
                 placeholderTextColor='#facc15'
               />
             ) : (
-              <Text className='text-white mb-2'>{empleado.telefono}</Text>
+              <Text className='text-white mb-2'>{empleado.Telefono}</Text>
             )}
           </View>
 
@@ -115,7 +118,7 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
                 placeholderTextColor='#facc15'
               />
             ) : (
-              <Text className='text-white mb-2'>{empleado.direccion}</Text>
+              <Text className='text-white mb-2'>{empleado.Direccion}</Text>
             )}
           </View>
 
@@ -135,7 +138,7 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
                 placeholderTextColor='#facc15'
               />
             ) : (
-              <Text className='text-white mb-2'>{empleado.seguroLaboral}</Text>
+              <Text className='text-white mb-2'>{empleado.SeguroLaboral}</Text>
             )}
           </View>
 
@@ -151,7 +154,7 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
                 placeholderTextColor='#facc15'
               />
             ) : (
-              <Text className='text-white mb-2'>{empleado.eps}</Text>
+              <Text className='text-white mb-2'>{empleado.EPS}</Text>
             )}
           </View>
 
@@ -169,7 +172,7 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
                 placeholderTextColor='#facc15'
               />
             ) : (
-              <Text className='text-white mb-2'>{empleado.tipoSangre}</Text>
+              <Text className='text-white mb-2'>{empleado.TipoSangineo}</Text>
             )}
           </View>
 
@@ -185,7 +188,7 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
                 placeholderTextColor='#facc15'
               />
             ) : (
-              <Text className='text-white mb-2'>{empleado.cargo}</Text>
+              <Text className='text-white mb-2'>{empleado.Cargo}</Text>
             )}
           </View>
 
@@ -201,7 +204,7 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
                 placeholderTextColor='#facc15'
               />
             ) : (
-              <Text className='text-white mb-2'>{empleado.acudiente}</Text>
+              <Text className='text-white mb-2'>{empleado.NombresAcudiente}</Text>
             )}
           </View>
           <View className='flex-row'>
@@ -220,7 +223,7 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
               />
             ) : (
               <Text className='text-white mb-2'>
-                {empleado.telefonoAcudiente}
+                {empleado.TelefonoAcudiente}
               </Text>
             )}
           </View>

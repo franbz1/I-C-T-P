@@ -18,7 +18,6 @@ export default function Login() {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false); // Para manejar la visibilidad de la contraseña
     const { setUser } = useContext(AuthContext);
-    const navigation = useNavigation();
 
     const handleLogin = async () => {
         if (!email || !password) {
