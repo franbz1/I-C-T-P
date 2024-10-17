@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { View, Text, Image, TouchableOpacity, TextInput } from 'react-native'
+import { View, Text, Image, TouchableOpacity, TextInput, Alert } from 'react-native'
 import Collapsible from 'react-native-collapsible'
 import {
   PencilIcon,
@@ -8,6 +8,7 @@ import {
   ChevronUpIcon,
   BookmarkIcon,
 } from 'react-native-heroicons/outline'
+import { updateEmpleado } from '../../../Backend/services/Empleado'
 
 const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
   const [isEditing, setIsEditing] = useState(false)
@@ -15,9 +16,24 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
     ...empleado,
   })
 
-  const handleEditToggle = () => {
+  const [tempEmpleado, setTempEmpleado] = useState({ ...empleado }) // Guarda una copia temporal del empleado original
+
+  const handleEditToggle = async () => {
     if (isEditing) {
-      console.log('Guardando cambios:', editedEmpleado)
+      // Intentar actualizar en Firebase
+      try {
+        await updateEmpleado(empleado.id, editedEmpleado)
+        // Si es exitoso, actualizamos tanto tempEmpleado como editedEmpleado
+        setTempEmpleado({ ...editedEmpleado })
+        setEditedEmpleado({ ...editedEmpleado })
+        console.log('Empleado actualizado con éxito:', editedEmpleado)
+      } catch (error) {
+        // Si falla, mostramos una alerta y descartamos los cambios en editedEmpleado
+        Alert.alert('Error', 'No se pudo actualizar el empleado. Intenta de nuevo.')
+        // Restauramos los valores originales de editedEmpleado a los previos en tempEmpleado
+        setEditedEmpleado({ ...tempEmpleado })
+        console.error('Error al actualizar el empleado:', error)
+      }
     }
     setIsEditing(!isEditing) // Cambiar el estado de edición
   }
@@ -26,8 +42,7 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
     setEditedEmpleado({ ...editedEmpleado, [key]: value })
   }
 
-  url = empleado.Foto ? empleado.Foto : 'https://via.placeholder.com/150'
-  
+  const url = empleado.Foto ? empleado.Foto : 'https://via.placeholder.com/150'
 
   return (
     <View className='mb-2 bg-neutral-900 rounded-lg shadow'>
@@ -37,24 +52,18 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
         activeOpacity={0.7}
       >
         <Text className='text-lg text-yellow-400 font-semibold'>
-          {empleado.Nombres}
+          {tempEmpleado.Nombres} {/* Usamos tempEmpleado aquí */}
         </Text>
         {expandedId === empleado.id ? (
-          <ChevronUpIcon
-            color='#facc15'
-            size={24}
-          />
+          <ChevronUpIcon color='#facc15' size={24} />
         ) : (
-          <ChevronDownIcon
-            color='#facc15'
-            size={24}
-          />
+          <ChevronDownIcon color='#facc15' size={24} />
         )}
       </TouchableOpacity>
       <Collapsible collapsed={expandedId !== empleado.id}>
         <View className='p-4 border-t border-[#facc15]'>
           <Image
-            source={{uri: url}}
+            source={{ uri: url }}
             className='w-24 h-24 rounded-full mb-4 self-center'
           />
 
@@ -64,13 +73,13 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
             {isEditing ? (
               <TextInput
                 value={editedEmpleado.Cedula}
-                onChangeText={(text) => handleInputChange('cc', text)}
+                onChangeText={(text) => handleInputChange('Cedula', text)}
                 className='text-white mb-2 flex-1 border-b border-yellow-400'
                 placeholder='Número de CC'
                 placeholderTextColor='#facc15'
               />
             ) : (
-              <Text className='text-white mb-2'>{empleado.Cedula}</Text>
+              <Text className='text-white mb-2'>{tempEmpleado.Cedula}</Text>
             )}
           </View>
 
@@ -79,14 +88,14 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
             <Text className='font-semibold text-yellow-400'>Correo: </Text>
             {isEditing ? (
               <TextInput
-                value={editedEmpleado.correo}
-                onChangeText={(text) => handleInputChange('correo', text)}
+                value={editedEmpleado.Correo}
+                onChangeText={(text) => handleInputChange('Correo', text)}
                 className='text-white mb-2 flex-1 border-b border-yellow-400'
                 placeholder='Correo'
                 placeholderTextColor='#facc15'
               />
             ) : (
-              <Text className='text-white mb-2'>{empleado.Correo}</Text>
+              <Text className='text-white mb-2'>{tempEmpleado.Correo}</Text>
             )}
           </View>
 
@@ -95,14 +104,14 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
             <Text className='font-semibold text-yellow-400'>Teléfono: </Text>
             {isEditing ? (
               <TextInput
-                value={editedEmpleado.telefono}
-                onChangeText={(text) => handleInputChange('telefono', text)}
+                value={editedEmpleado.Telefono}
+                onChangeText={(text) => handleInputChange('Telefono', text)}
                 className='text-white mb-2 flex-1 border-b border-yellow-400'
                 placeholder='Teléfono'
                 placeholderTextColor='#facc15'
               />
             ) : (
-              <Text className='text-white mb-2'>{empleado.Telefono}</Text>
+              <Text className='text-white mb-2'>{tempEmpleado.Telefono}</Text>
             )}
           </View>
 
@@ -111,34 +120,30 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
             <Text className='font-semibold text-yellow-400'>Dirección: </Text>
             {isEditing ? (
               <TextInput
-                value={editedEmpleado.direccion}
-                onChangeText={(text) => handleInputChange('direccion', text)}
+                value={editedEmpleado.Direccion}
+                onChangeText={(text) => handleInputChange('Direccion', text)}
                 className='text-white mb-2 flex-1 border-b border-yellow-400'
                 placeholder='Dirección'
                 placeholderTextColor='#facc15'
               />
             ) : (
-              <Text className='text-white mb-2'>{empleado.Direccion}</Text>
+              <Text className='text-white mb-2'>{tempEmpleado.Direccion}</Text>
             )}
           </View>
 
           {/* Campo editable para Seguro Laboral */}
           <View className='flex-row'>
-            <Text className='font-semibold text-yellow-400'>
-              Seguro Laboral:{' '}
-            </Text>
+            <Text className='font-semibold text-yellow-400'>Seguro Laboral: </Text>
             {isEditing ? (
               <TextInput
-                value={editedEmpleado.seguroLaboral}
-                onChangeText={(text) =>
-                  handleInputChange('seguroLaboral', text)
-                }
+                value={editedEmpleado.SeguroLaboral}
+                onChangeText={(text) => handleInputChange('SeguroLaboral', text)}
                 className='text-white mb-2 flex-1 border-b border-yellow-400'
                 placeholder='Seguro Laboral'
                 placeholderTextColor='#facc15'
               />
             ) : (
-              <Text className='text-white mb-2'>{empleado.SeguroLaboral}</Text>
+              <Text className='text-white mb-2'>{tempEmpleado.SeguroLaboral}</Text>
             )}
           </View>
 
@@ -147,32 +152,30 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
             <Text className='font-semibold text-yellow-400'>EPS: </Text>
             {isEditing ? (
               <TextInput
-                value={editedEmpleado.eps}
-                onChangeText={(text) => handleInputChange('eps', text)}
+                value={editedEmpleado.EPS}
+                onChangeText={(text) => handleInputChange('EPS', text)}
                 className='text-white mb-2 flex-1 border-b border-yellow-400'
                 placeholder='EPS'
                 placeholderTextColor='#facc15'
               />
             ) : (
-              <Text className='text-white mb-2'>{empleado.EPS}</Text>
+              <Text className='text-white mb-2'>{tempEmpleado.EPS}</Text>
             )}
           </View>
 
           {/* Campo editable para Tipo de Sangre */}
           <View className='flex-row'>
-            <Text className='font-semibold text-yellow-400'>
-              Tipo de Sangre:{' '}
-            </Text>
+            <Text className='font-semibold text-yellow-400'>Tipo de Sangre: </Text>
             {isEditing ? (
               <TextInput
-                value={editedEmpleado.tipoSangre}
-                onChangeText={(text) => handleInputChange('tipoSangre', text)}
+                value={editedEmpleado.TipoSangineo}
+                onChangeText={(text) => handleInputChange('TipoSangineo', text)}
                 className='text-white mb-2 flex-1 border-b border-yellow-400'
                 placeholder='Tipo de Sangre'
                 placeholderTextColor='#facc15'
               />
             ) : (
-              <Text className='text-white mb-2'>{empleado.TipoSangineo}</Text>
+              <Text className='text-white mb-2'>{tempEmpleado.TipoSangineo}</Text>
             )}
           </View>
 
@@ -181,71 +184,60 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
             <Text className='font-semibold text-yellow-400'>Cargo: </Text>
             {isEditing ? (
               <TextInput
-                value={editedEmpleado.cargo}
-                onChangeText={(text) => handleInputChange('cargo', text)}
+                value={editedEmpleado.Cargo}
+                onChangeText={(text) => handleInputChange('Cargo', text)}
                 className='text-white mb-2 flex-1 border-b border-yellow-400'
                 placeholder='Cargo'
                 placeholderTextColor='#facc15'
               />
             ) : (
-              <Text className='text-white mb-2'>{empleado.Cargo}</Text>
+              <Text className='text-white mb-2'>{tempEmpleado.Cargo}</Text>
             )}
           </View>
 
-          {/* Campos para Acudiente y Teléfono del Acudiente */}
+          {/* Campo editable para Acudiente */}
           <View className='flex-row'>
             <Text className='font-semibold text-yellow-400'>Acudiente: </Text>
             {isEditing ? (
               <TextInput
-                value={editedEmpleado.acudiente}
-                onChangeText={(text) => handleInputChange('acudiente', text)}
+                value={editedEmpleado.NombresAcudiente}
+                onChangeText={(text) => handleInputChange('NombresAcudiente', text)}
                 className='text-white mb-2 flex-1 border-b border-yellow-400'
                 placeholder='Acudiente'
                 placeholderTextColor='#facc15'
               />
             ) : (
-              <Text className='text-white mb-2'>{empleado.NombresAcudiente}</Text>
-            )}
-          </View>
-          <View className='flex-row'>
-            <Text className='font-semibold text-yellow-400'>
-              Teléfono del Acudiente:{' '}
-            </Text>
-            {isEditing ? (
-              <TextInput
-                value={editedEmpleado.telefonoAcudiente}
-                onChangeText={(text) =>
-                  handleInputChange('telefonoAcudiente', text)
-                }
-                className='text-white mb-2 flex-1 border-b border-yellow-400'
-                placeholder='Teléfono del Acudiente'
-                placeholderTextColor='#facc15'
-              />
-            ) : (
-              <Text className='text-white mb-2'>
-                {empleado.TelefonoAcudiente}
-              </Text>
+              <Text className='text-white mb-2'>{tempEmpleado.NombresAcudiente}</Text>
             )}
           </View>
 
+          {/* Campo editable para Teléfono del Acudiente */}
+          <View className='flex-row'>
+            <Text className='font-semibold text-yellow-400'>Teléfono del Acudiente: </Text>
+            {isEditing ? (
+              <TextInput
+                value={editedEmpleado.TelefonoAcudiente}
+                onChangeText={(text) => handleInputChange('TelefonoAcudiente', text)}
+                className='text-white mb-2 flex-1 border-b border-yellow-400'
+                placeholder='Teléfono Acudiente'
+                placeholderTextColor='#facc15'
+              />
+            ) : (
+              <Text className='text-white mb-2'>{tempEmpleado.TelefonoAcudiente}</Text>
+            )}
+          </View>
+
+          {/* Botones para guardar/cancelar edición */}
           <View className='flex-row justify-end mt-4'>
             <TouchableOpacity
               onPress={handleEditToggle}
-              className={`p-2 rounded-full mr-2 ${
-                isEditing ? 'bg-green-600' : 'bg-blue-600'
-              }`}
+              className={`p-2 rounded-full mr-2 ${isEditing ? 'bg-green-600' : 'bg-blue-600'}`}
               activeOpacity={0.7}
             >
               {isEditing ? (
-                <BookmarkIcon
-                  color='white'
-                  size={20}
-                />
+                <BookmarkIcon color='white' size={20} />
               ) : (
-                <PencilIcon
-                  color='white'
-                  size={20}
-                />
+                <PencilIcon color='white' size={20} />
               )}
             </TouchableOpacity>
             <TouchableOpacity
@@ -253,10 +245,7 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
               className='bg-red-600 p-2 rounded-full'
               activeOpacity={0.7}
             >
-              <TrashIcon
-                color='white'
-                size={20}
-              />
+              <TrashIcon color='white' size={20} />
             </TouchableOpacity>
           </View>
         </View>
