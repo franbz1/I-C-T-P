@@ -16,49 +16,6 @@ export default function Bitacora() {
   const [error, setError] = useState(null)
   const [expandedEntry, setExpandedEntry] = useState(null)
 
-  const loadTestBitacoraEntries = async () => {
-    try {
-      const testEntries = [
-        {
-          fecha: new Date(2024, 1, 12), // Fecha 12 de febrero de 2024
-          detalles:
-            'Realizamos una inspección del terreno y se encontró un problema con la maquinaria.',
-          fotos: [
-            'https://picsum.photos/seed/a1/900/900',
-            'https://picsum.photos/seed/a3/900/900',
-          ],
-          empleados: ['empleado1', 'empleado2'], // IDs de empleados
-        },
-        {
-          fecha: new Date(2024, 1, 13), // Fecha 13 de febrero de 2024
-          detalles:
-            'El equipo instaló las primeras bases estructurales y continuó con la nivelación del suelo.',
-          fotos: ['https://picsum.photos/seed/a3/900/900'],
-          empleados: ['empleado2', 'empleado3'], // IDs de empleados
-        },
-        {
-          fecha: new Date(2024, 1, 14), // Fecha 14 de febrero de 2024
-          detalles:
-            'Se avanzó en la construcción del sistema de drenaje, todo el equipo en sitio trabajando.',
-          fotos: [],
-          empleados: ['empleado1', 'empleado3'], // IDs de empleados
-        },
-      ];
-
-      for (const entry of testEntries) {   
-        console.log(entry);
-        await createBitacoraEntry(id, entry) // Crear cada entrada usando el servicio
-        console.log(
-          `Entrada de bitácora para ${entry.fecha.toDateString()} creada con éxito.`
-        )
-      }
-
-      console.log('Datos de prueba cargados con éxito.')
-    } catch (error) {
-      console.error('Error al cargar datos de prueba para bitácora: ', error)
-    }
-  }
-
   useEffect(() => {
     const fetchEntries = async () => {
       try {
@@ -110,7 +67,7 @@ export default function Bitacora() {
 
   return (
     <SafeAreaView className='flex-1 bg-black'>
-      <BarraOpciones btnDev={loadTestBitacoraEntries}/>
+      <BarraOpciones />
       <BotonAgregarBitacora id={id} />
       <FlatList
         data={entries}

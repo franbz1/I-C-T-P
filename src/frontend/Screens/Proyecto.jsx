@@ -65,54 +65,10 @@ export default function Proyecto() {
     );
   }
 
-  const loadTestData = async () => {
-    const testComments = [
-      {
-        titulo: 'Comentario de prueba 1',
-        detalles: 'Detalles del comentario de prueba 1',
-        resuelto: false,
-        fechaComentario: '2024-10-01',
-        fechaResuelto: null,
-      },
-      {
-        titulo: 'Comentario de prueba 2',
-        detalles: 'Detalles del comentario de prueba 2',
-        resuelto: true,
-        fechaComentario: '2024-10-02',
-        fechaResuelto: '2024-10-05',
-      },
-      {
-        titulo: 'Comentario de prueba 3',
-        detalles: 'Detalles del comentario de prueba 3',
-        resuelto: false,
-        fechaComentario: '2024-10-03',
-        fechaResuelto: null,
-      },
-      {
-        titulo: 'Comentario de prueba 4',
-        detalles: 'Detalles del comentario de prueba 4',
-        resuelto: true,
-        fechaComentario: '2024-10-04',
-        fechaResuelto: '2024-10-06',
-      },
-    ];
-
-    try {
-      // Crear cada comentario en Firestore
-      for (const comment of testComments) {
-        const commentId = await createComentario(projectId, comment);
-        console.log(`Comentario ${comment.titulo} creado con ID: ${commentId}`);
-      }
-      Alert.alert('Éxito', 'Comentarios de prueba cargados correctamente.');
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Error', 'No se pudieron crear los comentarios de prueba.');
-    }
-  };
 
   return (
     <SafeAreaView className='flex-1 bg-black'>
-      <BarraOpciones btnDev={loadTestData} />
+      <BarraOpciones />
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         className='p-4'
