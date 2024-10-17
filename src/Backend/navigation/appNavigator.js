@@ -9,6 +9,7 @@ import Proyecto from '../../frontend/Screens/Proyecto' //Pantalla de un proyecto
 import Bitacora from '../../frontend/Screens/Bitacora'; //';
 import FormularioBitacora from '../../frontend/Screens/FormularioBitacora';
 import Nomina from '../../frontend/Screens/Nomina';
+import NominaProyecto from '../../frontend/Screens/NominaProyecto';
 import AgregarEmpleado from '../../frontend/Screens/AgregarEmpleado';
 
 const Stack = createNativeStackNavigator();
@@ -32,6 +33,7 @@ const AppNavigator = () => {
                         <Stack.Screen name='FormularioBitacora' component={FormularioBitacora} options={{headerShown: false}} />
                         <Stack.Screen name='AgregarEmpleado' component={AgregarEmpleado} options={{headerShown: false}} />
                         <Stack.Screen name='Nomina' component={Nomina} options={{headerShown: false}} />
+                        <Stack.Screen name='NominaProyecto' component={NominaProyecto} options={{headerShown: false}} />
                         {/* Agrega más pantallas protegidas aquí */}
                     </>
                 ) : (

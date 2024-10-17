@@ -1,5 +1,5 @@
 import { firestore } from '../../../firebase';
-import { collection, addDoc, getDocs, getDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, getDoc, updateDoc, deleteDoc, doc, query, where, arrayUnion } from 'firebase/firestore';
 
 // Crear un empleado
 export const createEmpleado = async (empleadoData) => {
@@ -18,8 +18,8 @@ export const createEmpleado = async (empleadoData) => {
       EPS: empleadoData.eps,
       TipoSangineo: empleadoData.tipoSangineo,
       Cargo: empleadoData.cargo,
-      Proyectos: empleadoData.proyectos || [],
-      Foto: empleadoData.foto || null, // Opcional, puede ser null
+      Proyectos: empleadoData.proyectos || [],  // Array de IDs de proyectos
+      Foto: empleadoData.foto || null,
     });
     console.log('Empleado creado con éxito.');
     return empleadoRef.id;
@@ -40,6 +40,25 @@ export const getEmpleados = async () => {
     }));
   } catch (error) {
     console.error('Error al obtener los empleados: ', error);
+    throw error;
+  }
+};
+
+// Obtener empleados por proyecto (basado en el ID del proyecto)
+export const getEmpleadosByProyecto = async (proyectoId) => {
+  try {
+    const empleadosCollection = collection(firestore, 'Empleados');
+    // Usamos el operador array-contains para verificar si el proyectoId está en el array de Proyectos
+    const empleadosQuery = query(empleadosCollection, where('Proyectos', 'array-contains', proyectoId));
+    const empleadosSnapshot = await getDocs(empleadosQuery);
+
+    // Retorna la lista de empleados que están en el proyecto
+    return empleadosSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+  } catch (error) {
+    console.error('Error al obtener empleados por proyecto: ', error);
     throw error;
   }
 };
@@ -80,6 +99,21 @@ export const deleteEmpleado = async (empleadoId) => {
     console.log('Empleado eliminado con éxito.');
   } catch (error) {
     console.error('Error al eliminar el empleado: ', error);
+    throw error;
+  }
+};
+
+// Actualizar los proyectos del empleado
+export const agregarProyectoAEmpleado = async (empleadoId, proyectoId) => {
+  try {
+    const empleadoDoc = doc(firestore, 'Empleados', empleadoId);
+    // Usa arrayUnion para agregar el proyecto a la lista sin duplicados
+    await updateDoc(empleadoDoc, {
+      Proyectos: arrayUnion(proyectoId),
+    });
+    console.log('Proyecto agregado al empleado con éxito.');
+  } catch (error) {
+    console.error('Error al agregar el proyecto al empleado: ', error);
     throw error;
   }
 };

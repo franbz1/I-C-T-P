@@ -17,7 +17,7 @@ const BotonNavegacionProyecto = ({ texto, ruta, id }) => {
         return 'bg-yellow-400';
       case 'Informe':
         return 'bg-yellow-500';
-      case 'Nomina':
+      case 'NominaProyecto':
         return 'bg-yellow-600';
       default:
         return 'bg-yellow-400';

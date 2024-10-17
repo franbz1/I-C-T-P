@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { View, FlatList, ActivityIndicator, Alert } from 'react-native'
 import { useRoute } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { getBitacoraEntries, createBitacoraEntry } from '../../Backend/services/BitacoraService'
+import { getBitacoraEntries } from '../../Backend/services/BitacoraService'
 import BitacoraEntry from '../components/Bitacora/BitacoraEntry'
 import EmptyBitacora from '../components/Bitacora/EmptyBitacora'
 import BarraOpciones from '../components/BarraOpciones'
