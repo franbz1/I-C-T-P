@@ -14,6 +14,7 @@ export const createProject = async (projectData) => {
       Nombre: projectData.projectName,
       FechaInicio: Timestamp.fromDate(new Date(projectData.startDate)),
       FechaFin: Timestamp.fromDate(new Date(projectData.endDate)),
+      Empleados: projectData.empleados || [],
       Imagen: projectData.imageUrl || '', // Imagen opcional
     });
 

@@ -18,6 +18,7 @@ export const createEmpleado = async (empleadoData) => {
       EPS: empleadoData.eps,
       TipoSangineo: empleadoData.tipoSangineo,
       Cargo: empleadoData.cargo,
+      Proyectos: empleadoData.proyectos || [],
       Foto: empleadoData.foto || null, // Opcional, puede ser null
     });
     console.log('Empleado creado con éxito.');
