@@ -8,6 +8,7 @@ import Loading from '../../frontend/Screens/Loading'; // Pantalla de carga opcio
 import Proyecto from '../../frontend/Screens/Proyecto' //Pantalla de un proyecto
 import Bitacora from '../../frontend/Screens/Bitacora'; //';
 import FormularioBitacora from '../../frontend/Screens/FormularioBitacora';
+import Nomina from '../../frontend/Screens/Nomina';
 
 const Stack = createNativeStackNavigator();
 
@@ -28,6 +29,7 @@ const AppNavigator = () => {
                         <Stack.Screen name='Proyecto' component={Proyecto} options={{headerShown: false}} />
                         <Stack.Screen name='Bitacora' component={Bitacora} options={{ headerShown: false }} />
                         <Stack.Screen name='FormularioBitacora' component={FormularioBitacora} options={{headerShown: false}} />
+                        <Stack.Screen name='Nomina' component={Nomina} options={{headerShown: false}} />
                         {/* Agrega más pantallas protegidas aquí */}
                     </>
                 ) : (
