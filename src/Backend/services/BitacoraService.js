@@ -10,7 +10,7 @@ const convertTimestampToDate = (timestamp) => {
 // Crear una entrada de bitácora para un proyecto específico
 export const createBitacoraEntry = async (projectId, bitacoraData) => {
   try {
-    const bitacoraCollection = collection(firestore, `Proyectos/${projectId}/EntradaBitacora`);
+    const bitacoraCollection = collection(firestore, `Proyectos/${projectId}/EntradaBitacora`); 
     
     // Verificar que el array de IDs de empleados no sea null o vacío
     if (!bitacoraData.empleados || bitacoraData.empleados.length === 0) {
