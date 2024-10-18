@@ -14,6 +14,7 @@ const ModalListaEmpleados = ({ visible, empleados, onClose, onConfirm }) => {
 
   const handleConfirm = () => {
     onConfirm(selectedEmpleados);
+    setSelectedEmpleados([]);
     onClose();
   };
 
@@ -33,7 +34,7 @@ const ModalListaEmpleados = ({ visible, empleados, onClose, onConfirm }) => {
                     : "bg-black"
                 }`}
               >
-                <Text className='text-white'>
+                <Text className={`${selectedEmpleados.includes(empleado.id) ? 'text-black' : 'text-white'}`}>
                   {empleado.Nombres} {empleado.Apellidos}
                 </Text>
               </TouchableOpacity>
