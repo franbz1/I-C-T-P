@@ -1,15 +1,7 @@
 // components/Comentarios.js
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  Pressable,
-  Alert,
-} from 'react-native';
-import {
-  subscribeToComentarios,
-  updateComentario,
-} from '../../../Backend/services/CommentService';
+import { View, Text, Pressable, Alert } from 'react-native';
+import { subscribeToComentarios, updateComentario } from '../../../Backend/services/CommentService';
 
 const Comentarios = ({ projectId }) => {
   const [comments, setComments] = useState([]);
@@ -72,10 +64,18 @@ const Comentarios = ({ projectId }) => {
     }
   };
 
-  // Función para formatear los timestamps de Firestore
+  // Función para formatear los timestamps de Firestore o fechas en formato ISO
   const formatTimestamp = (timestamp) => {
-    if (!timestamp) return '';
-    const date = timestamp.toDate(); // Firestore Timestamp tiene el método toDate()
+    if (!timestamp) return ''; // Manejar null o undefined
+
+    // Verificar si es un objeto de tipo Firestore.Timestamp
+    if (timestamp.toDate) {
+      const date = timestamp.toDate();
+      return date.toLocaleDateString();
+    }
+
+    // Si no es un Timestamp, tratarlo como cadena (ISO string)
+    const date = new Date(timestamp);
     return date.toLocaleDateString();
   };
 
