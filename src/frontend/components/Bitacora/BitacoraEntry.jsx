@@ -30,7 +30,7 @@ export default function BitacoraEntry({ item, expandedEntry, toggleEntry, projec
     <View className="bg-neutral-900 rounded-lg p-4 mb-4">
       {/* Fecha de la entrada */}
       <Pressable onPress={() => toggleEntry(item.id)} className="flex-row items-center">
-        <Text className="text-yellow-400 text-xl font-bold flex-1">{new Date(item.Fecha).toDateString()}</Text>
+        <Text className="text-yellow-400 text-xl font-bold flex-1">{item.Fecha}</Text>
         <Text className="text-yellow-500 text-xl">
           {expandedEntry === item.id ? '▲' : '▼'}
         </Text>

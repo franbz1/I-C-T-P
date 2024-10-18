@@ -2,6 +2,7 @@
 import React, { useState, useContext } from "react";
 import { View, Pressable, Text, Modal, Alert } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { ChevronLeftIcon } from 'react-native-heroicons/outline'
 import { AuthContext } from "../../Backend/auth/authContext";
 import { signOut } from "firebase/auth";
 import { auth } from "../../../firebase";
@@ -30,11 +31,18 @@ export default function BarraOpciones() {
     toggleUserModal()
   }
 
+  const handleGoBack = () => {
+    navigation.goBack();
+  };
+
   return (
     <>
-      <View className="flex-row justify-end mb-2 px-4 pt-4">
+      <View className="flex-row justify-between mb-2 px-4 pt-4">
+        <Pressable onPress={handleGoBack}>
+          <Feather name="chevron-left" size={32} color="#FFD700" />
+        </Pressable>
         <Pressable onPress={toggleUserModal}>
-          <Feather name="user" size={28} color="#FFD700" />
+          <Feather name="more-vertical" size={28} color="#FFD700" />
         </Pressable>
       </View>
 

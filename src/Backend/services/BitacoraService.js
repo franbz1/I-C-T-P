@@ -2,10 +2,17 @@
 import { firestore } from '../../../firebase';
 import { collection, Timestamp, doc, addDoc, getDocs, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 
-// Helper para convertir fechas de Timestamp de Firebase a JavaScript Date
+// Helper para convertir fechas de Timestamp de Firebase a JavaScript Date y luego a formato en español
 const convertTimestampToDate = (timestamp) => {
-  return timestamp instanceof Timestamp ? new Date(timestamp.seconds * 1000) : new Date(timestamp);
+  const date = timestamp instanceof Timestamp ? new Date(timestamp.seconds * 1000) : new Date(timestamp);
+  return date.toLocaleDateString('es-ES', {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
 };
+
 
 // Crear una entrada de bitácora para un proyecto específico
 export const createBitacoraEntry = async (projectId, bitacoraData) => {
