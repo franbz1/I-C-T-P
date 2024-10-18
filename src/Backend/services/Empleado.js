@@ -1,5 +1,5 @@
 import { firestore } from '../../../firebase';
-import { collection, addDoc, getDocs, getDoc, updateDoc, deleteDoc, doc, query, where, arrayUnion } from 'firebase/firestore';
+import { collection, addDoc, getDocs, getDoc, updateDoc, deleteDoc, doc, query, where, arrayUnion, arrayRemove } from 'firebase/firestore';
 
 // Crear un empleado
 export const createEmpleado = async (empleadoData) => {
@@ -114,6 +114,21 @@ export const agregarProyectoAEmpleado = async (empleadoId, proyectoId) => {
     console.log('Proyecto agregado al empleado con éxito.');
   } catch (error) {
     console.error('Error al agregar el proyecto al empleado: ', error);
+    throw error;
+  }
+};
+
+// Eliminar a un empleado de un proyecto
+export const eliminarProyectoAEmpleado = async (empleadoId, proyectoId) => {
+  try {
+    const empleadoDoc = doc(firestore, 'Empleados', empleadoId);
+    // Usa arrayUnion para eliminar el proyecto de la lista sin duplicados
+    await updateDoc(empleadoDoc, {
+      Proyectos: arrayRemove(proyectoId),
+    });
+    console.log('Proyecto eliminado del empleado con éxito.');
+  } catch (error) {
+    console.error('Error al agregar el eliminar el proyecto del empleado: ', error);
     throw error;
   }
 };

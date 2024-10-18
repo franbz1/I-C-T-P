@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { ScrollView, Alert, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRoute } from "@react-navigation/native";
@@ -9,113 +9,106 @@ import {
   getEmpleados,
   agregarProyectoAEmpleado,
   getEmpleadosByProyecto,
+  eliminarProyectoAEmpleado,
 } from "../../Backend/services/Empleado";
-import ModalListaEmpleados from "../components/Nomina/ModalListaEmpleados"; // Importamos el modal
+import ModalListaEmpleados from "../components/Nomina/ModalListaEmpleados";
 
 export default function NominaProyecto() {
-  const route = useRoute(); // Obtener los params de la ruta
-  const { id } = route.params; // Obtener el ID del proyecto desde los params de la ruta
+  const route = useRoute(); 
+  const { id } = route.params; 
 
-  const [empleados, setEmpleados] = useState([]);
-  const [empleadosProyecto, setEmpleadosProyecto] = useState([]);
+  const [empleados, setEmpleados] = useState([]); // Empleados no asignados al proyecto
+  const [empleadosProyecto, setEmpleadosProyecto] = useState([]); // Empleados asignados al proyecto
   const [expandedId, setExpandedId] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false); // Para controlar la visibilidad del modal
-  const [loadingProyecto, setLoadingProyecto] = useState(true); // Controlar cuando los empleados del proyecto se cargan
+  const [modalVisible, setModalVisible] = useState(false);
+  const [loadingProyecto, setLoadingProyecto] = useState(true);
 
   // Función para obtener los empleados del proyecto
-  const fetchEmpleadosProyecto = async () => {
+  const fetchEmpleadosProyecto = useCallback(async () => {
     try {
       const empleadosData = await getEmpleadosByProyecto(id);
       setEmpleadosProyecto(empleadosData);
     } catch (error) {
       console.error("Error al obtener los empleados del proyecto:", error);
-      Alert.alert(
-        "Error",
-        "Ocurrió un error al obtener los empleados del proyecto"
-      );
+      Alert.alert("Error", "Ocurrió un error al obtener los empleados del proyecto");
     } finally {
-      setLoadingProyecto(false); // Indicar que los empleados del proyecto se han cargado
+      setLoadingProyecto(false);
     }
-  };
-
-  // Función para obtener los empleados excluyendo los que ya están en el proyecto
-  const fetchEmpleados = async () => {
-    if (loadingProyecto) return; // Esperar hasta que los empleados del proyecto se hayan cargado
-
-    try {
-      // Obtener todos los empleados
-      const empleadosData = await getEmpleados();
-
-      // Excluir los empleados que ya están en este proyecto
-      const empleadosFiltrados = empleadosData.filter(
-        (empleado) =>
-          !empleadosProyecto.some(
-            (empProyecto) => empProyecto.id === empleado.id
-          )
-      );
-
-      setEmpleados(empleadosFiltrados); // Actualizar el estado con los empleados filtrados
-    } catch (error) {
-      console.error("Error al obtener los empleados: ", error);
-      Alert.alert("Error", "Ocurrió un error al obtener la lista de empleados");
-    }
-  };
-
-  // useEffect para obtener los empleados del proyecto primero, luego los otros empleados
-  useEffect(() => {
-    const fetchData = async () => {
-      await fetchEmpleadosProyecto(); // Obtener los empleados del proyecto
-    };
-
-    fetchData(); // Llamar a la función para obtener empleados y proyectos
-  }, []);
-
-  // useEffect para cargar los empleados una vez que los empleados del proyecto están cargados
-  useEffect(() => {
-    if (!loadingProyecto) {
-      fetchEmpleados(); // Llamar a la función para obtener empleados excluyendo los del proyecto
-    }
-  }, [loadingProyecto]); // Ejecutar fetchEmpleados cuando empleadosProyecto esté listo
+  }, [id]);
 
   const toggleExpand = (id) => {
     setExpandedId(expandedId === id ? null : id);
   };
 
-  const handleDelete = (id) => {
-    console.log("Eliminar empleado con ID:", id);
+  // Función para obtener los empleados excluyendo los que ya están en el proyecto
+  const fetchEmpleados = useCallback(async () => {
+    if (loadingProyecto) return;
+
+    try {
+      const empleadosData = await getEmpleados();
+      const empleadosFiltrados = empleadosData.filter(
+        (empleado) => !empleadosProyecto.some((empProyecto) => empProyecto.id === empleado.id)
+      );
+      setEmpleados(empleadosFiltrados);
+    } catch (error) {
+      console.error("Error al obtener los empleados: ", error);
+      Alert.alert("Error", "Ocurrió un error al obtener la lista de empleados");
+    }
+  }, [empleadosProyecto, loadingProyecto]);
+
+  // useEffect para cargar empleados del proyecto al montar el componente
+  useEffect(() => {
+    const fetchData = async () => {
+      await fetchEmpleadosProyecto();
+    };
+    fetchData();
+  }, [fetchEmpleadosProyecto]);
+
+  // useEffect para cargar empleados disponibles cuando los empleados del proyecto estén listos
+  useEffect(() => {
+    if (!loadingProyecto) {
+      fetchEmpleados();
+    }
+  }, [loadingProyecto, fetchEmpleados]);
+
+  // Manejar eliminación de empleado del proyecto
+  const handleDelete = async (empleadoId) => {
+    try {
+      await eliminarProyectoAEmpleado(empleadoId, id);
+      setEmpleadosProyecto((prevEmpleados) => prevEmpleados.filter((empleado) => empleado.id !== empleadoId));
+      setEmpleados((prevEmpleados) => [...prevEmpleados, empleadosProyecto.find(e => e.id === empleadoId)]);
+      console.log("Empleado eliminado del proyecto.");
+    } catch (error) {
+      console.error("Error al eliminar al empleado del proyecto: ", error);
+      Alert.alert("Error", "Ocurrió un error al intentar eliminar al empleado del proyecto");
+    }
   };
 
-  const handleAddEmployee = () => {
-    setModalVisible(true); // Mostrar el modal al presionar el botón de agregar
-  };
-
+  // Manejar agregar empleados al proyecto
   const handleConfirmSelection = async (selectedEmpleados) => {
     try {
-      // Filtrar los empleados seleccionados del array de empleados
       const empleadosSeleccionados = empleados.filter((empleado) =>
         selectedEmpleados.includes(empleado.id)
       );
-      // Agregar los empleados seleccionados al proyecto localmente
-      setEmpleadosProyecto((prevEmpleados) => [
-        ...prevEmpleados,
-        ...empleadosSeleccionados,
-      ]);
 
-      // Agregar el proyecto a cada empleado en Firestore
       await Promise.all(
         selectedEmpleados.map(async (empleadoId) => {
-          console.log(empleadoId, id); // Aquí usamos "id" que viene de route.params
-          await agregarProyectoAEmpleado(empleadoId, id); // Pasar el id del proyecto (no proyectoId)
+          await agregarProyectoAEmpleado(empleadoId, id);
         })
+      );
+
+      // Actualizamos los empleados del proyecto y la lista disponible
+      setEmpleadosProyecto((prev) => [...prev, ...empleadosSeleccionados]);
+      setEmpleados((prev) =>
+        prev.filter((empleado) => !selectedEmpleados.includes(empleado.id))
       );
 
       console.log("Empleados agregados correctamente al proyecto.");
     } catch (error) {
       console.error("Error al agregar empleados al proyecto: ", error);
-      Alert.alert(
-        "Error",
-        "Ocurrió un error al agregar los empleados al proyecto"
-      );
+      Alert.alert("Error", "Ocurrió un error al agregar los empleados al proyecto");
+    } finally {
+      setModalVisible(false);
     }
   };
 
@@ -128,12 +121,12 @@ export default function NominaProyecto() {
             Empleados en el Proyecto
           </Text>
           <EmpleadoList
-            empleados={empleadosProyecto} // Usa los empleados obtenidos desde Firestore
+            empleados={empleadosProyecto} 
             expandedId={expandedId}
             toggleExpand={toggleExpand}
             handleDelete={handleDelete}
           />
-          <AgregarEmpleadoBoton handleAddEmployee={handleAddEmployee} />
+          <AgregarEmpleadoBoton handleAddEmployee={() => setModalVisible(true)} />
         </View>
       </ScrollView>
 
@@ -141,8 +134,8 @@ export default function NominaProyecto() {
       <ModalListaEmpleados
         visible={modalVisible}
         empleados={empleados}
-        onClose={() => setModalVisible(false)} // Cerrar modal
-        onConfirm={handleConfirmSelection} // Manejar la confirmación de selección
+        onClose={() => setModalVisible(false)} 
+        onConfirm={handleConfirmSelection}
       />
     </SafeAreaView>
   );

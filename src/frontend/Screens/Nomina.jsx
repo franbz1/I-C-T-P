@@ -54,6 +54,7 @@ export default function Nomina() {
             expandedId={expandedId}
             toggleExpand={toggleExpand}
             handleDelete={handleDelete}
+            allowEdit={true}
           />
           <AgregarEmpleadoBoton handleAddEmployee={handleAddEmployee} />
         </View>

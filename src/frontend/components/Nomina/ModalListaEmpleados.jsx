@@ -27,13 +27,13 @@ const ModalListaEmpleados = ({ visible, empleados, onClose, onConfirm }) => {
               <TouchableOpacity
                 key={empleado.id}
                 onPress={() => toggleEmpleadoSelection(empleado.id)}
-                className={`p-2 border-b ${
+                className={`p-2 rounded-lg border-b ${
                   selectedEmpleados.includes(empleado.id)
-                    ? "bg-yellow-200"
-                    : "bg-white"
+                    ? "bg-yellow-400"
+                    : "bg-black"
                 }`}
               >
-                <Text>
+                <Text className='text-white'>
                   {empleado.Nombres} {empleado.Apellidos}
                 </Text>
               </TouchableOpacity>

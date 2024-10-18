@@ -1,5 +1,12 @@
 import React, { useState } from 'react'
-import { View, Text, Image, TouchableOpacity, TextInput, Alert } from 'react-native'
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+} from 'react-native'
 import Collapsible from 'react-native-collapsible'
 import {
   PencilIcon,
@@ -29,7 +36,10 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
         console.log('Empleado actualizado con éxito:', editedEmpleado)
       } catch (error) {
         // Si falla, mostramos una alerta y descartamos los cambios en editedEmpleado
-        Alert.alert('Error', 'No se pudo actualizar el empleado. Intenta de nuevo.')
+        Alert.alert(
+          'Error',
+          'No se pudo actualizar el empleado. Intenta de nuevo.'
+        )
         // Restauramos los valores originales de editedEmpleado a los previos en tempEmpleado
         setEditedEmpleado({ ...tempEmpleado })
         console.error('Error al actualizar el empleado:', error)
@@ -55,9 +65,15 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
           {tempEmpleado.Nombres} {/* Usamos tempEmpleado aquí */}
         </Text>
         {expandedId === empleado.id ? (
-          <ChevronUpIcon color='#facc15' size={24} />
+          <ChevronUpIcon
+            color='#facc15'
+            size={24}
+          />
         ) : (
-          <ChevronDownIcon color='#facc15' size={24} />
+          <ChevronDownIcon
+            color='#facc15'
+            size={24}
+          />
         )}
       </TouchableOpacity>
       <Collapsible collapsed={expandedId !== empleado.id}>
@@ -66,6 +82,38 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
             source={{ uri: url }}
             className='w-24 h-24 rounded-full mb-4 self-center'
           />
+
+          {/* Campo editable para Nombres */}
+          <View className='flex-row'>
+            <Text className='font-semibold text-yellow-400'>Nombres: </Text>
+            {isEditing ? (
+              <TextInput
+                value={editedEmpleado.Nombres}
+                onChangeText={(text) => handleInputChange('Nombres', text)}
+                className='text-white mb-2 flex-1 border-b border-yellow-400'
+                placeholder='Nombres'
+                placeholderTextColor='#facc15'
+              />
+            ) : (
+              <Text className='text-white mb-2'>{tempEmpleado.Nombres}</Text>
+            )}
+          </View>
+
+          {/* Campo editable para Apellidos */}
+          <View className='flex-row'>
+            <Text className='font-semibold text-yellow-400'>Apellidos: </Text>
+            {isEditing ? (
+              <TextInput
+                value={editedEmpleado.Apellidos}
+                onChangeText={(text) => handleInputChange('Apellidos', text)}
+                className='text-white mb-2 flex-1 border-b border-yellow-400'
+                placeholder='Apellidos'
+                placeholderTextColor='#facc15'
+              />
+            ) : (
+              <Text className='text-white mb-2'>{tempEmpleado.Apellidos}</Text>
+            )}
+          </View>
 
           {/* Campo no editable para "CC:" */}
           <View className='flex-row'>
@@ -133,17 +181,23 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
 
           {/* Campo editable para Seguro Laboral */}
           <View className='flex-row'>
-            <Text className='font-semibold text-yellow-400'>Seguro Laboral: </Text>
+            <Text className='font-semibold text-yellow-400'>
+              Seguro Laboral:{' '}
+            </Text>
             {isEditing ? (
               <TextInput
                 value={editedEmpleado.SeguroLaboral}
-                onChangeText={(text) => handleInputChange('SeguroLaboral', text)}
+                onChangeText={(text) =>
+                  handleInputChange('SeguroLaboral', text)
+                }
                 className='text-white mb-2 flex-1 border-b border-yellow-400'
                 placeholder='Seguro Laboral'
                 placeholderTextColor='#facc15'
               />
             ) : (
-              <Text className='text-white mb-2'>{tempEmpleado.SeguroLaboral}</Text>
+              <Text className='text-white mb-2'>
+                {tempEmpleado.SeguroLaboral}
+              </Text>
             )}
           </View>
 
@@ -165,7 +219,9 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
 
           {/* Campo editable para Tipo de Sangre */}
           <View className='flex-row'>
-            <Text className='font-semibold text-yellow-400'>Tipo de Sangre: </Text>
+            <Text className='font-semibold text-yellow-400'>
+              Tipo de Sangre:{' '}
+            </Text>
             {isEditing ? (
               <TextInput
                 value={editedEmpleado.TipoSangineo}
@@ -175,7 +231,9 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
                 placeholderTextColor='#facc15'
               />
             ) : (
-              <Text className='text-white mb-2'>{tempEmpleado.TipoSangineo}</Text>
+              <Text className='text-white mb-2'>
+                {tempEmpleado.TipoSangineo}
+              </Text>
             )}
           </View>
 
@@ -201,29 +259,39 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
             {isEditing ? (
               <TextInput
                 value={editedEmpleado.NombresAcudiente}
-                onChangeText={(text) => handleInputChange('NombresAcudiente', text)}
+                onChangeText={(text) =>
+                  handleInputChange('NombresAcudiente', text)
+                }
                 className='text-white mb-2 flex-1 border-b border-yellow-400'
                 placeholder='Acudiente'
                 placeholderTextColor='#facc15'
               />
             ) : (
-              <Text className='text-white mb-2'>{tempEmpleado.NombresAcudiente}</Text>
+              <Text className='text-white mb-2'>
+                {tempEmpleado.NombresAcudiente}
+              </Text>
             )}
           </View>
 
           {/* Campo editable para Teléfono del Acudiente */}
           <View className='flex-row'>
-            <Text className='font-semibold text-yellow-400'>Teléfono del Acudiente: </Text>
+            <Text className='font-semibold text-yellow-400'>
+              Teléfono del Acudiente:{' '}
+            </Text>
             {isEditing ? (
               <TextInput
                 value={editedEmpleado.TelefonoAcudiente}
-                onChangeText={(text) => handleInputChange('TelefonoAcudiente', text)}
+                onChangeText={(text) =>
+                  handleInputChange('TelefonoAcudiente', text)
+                }
                 className='text-white mb-2 flex-1 border-b border-yellow-400'
                 placeholder='Teléfono Acudiente'
                 placeholderTextColor='#facc15'
               />
             ) : (
-              <Text className='text-white mb-2'>{tempEmpleado.TelefonoAcudiente}</Text>
+              <Text className='text-white mb-2'>
+                {tempEmpleado.TelefonoAcudiente}
+              </Text>
             )}
           </View>
 
@@ -231,13 +299,21 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
           <View className='flex-row justify-end mt-4'>
             <TouchableOpacity
               onPress={handleEditToggle}
-              className={`p-2 rounded-full mr-2 ${isEditing ? 'bg-green-600' : 'bg-blue-600'}`}
+              className={`p-2 rounded-full mr-2 ${
+                isEditing ? 'bg-green-600' : 'bg-blue-600'
+              }`}
               activeOpacity={0.7}
             >
               {isEditing ? (
-                <BookmarkIcon color='white' size={20} />
+                <BookmarkIcon
+                  color='white'
+                  size={20}
+                />
               ) : (
-                <PencilIcon color='white' size={20} />
+                <PencilIcon
+                  color='white'
+                  size={20}
+                />
               )}
             </TouchableOpacity>
             <TouchableOpacity
@@ -245,7 +321,10 @@ const EmpleadoItem = ({ empleado, expandedId, toggleExpand, handleDelete }) => {
               className='bg-red-600 p-2 rounded-full'
               activeOpacity={0.7}
             >
-              <TrashIcon color='white' size={20} />
+              <TrashIcon
+                color='white'
+                size={20}
+              />
             </TouchableOpacity>
           </View>
         </View>
