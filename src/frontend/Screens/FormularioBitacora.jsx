@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   TextInput,
@@ -6,34 +6,44 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-} from 'react-native'
-import { useRoute, useNavigation } from '@react-navigation/native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { createBitacoraEntry } from '../../Backend/services/BitacoraService'
-import { getEmpleadosByProyecto, getEmpleadoById } from '../../Backend/services/Empleado'
-import { styled } from 'nativewind'
-import ModalListaEmpleados from '../components/Nomina/ModalListaEmpleados'
-import BarraOpciones from '../components/BarraOpciones'
+  Image,
+} from 'react-native';
+import { useRoute, useNavigation } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { createBitacoraEntry } from '../../Backend/services/BitacoraService';
+import { getEmpleadosByProyecto, getEmpleadoById } from '../../Backend/services/Empleado';
+import { styled } from 'nativewind';
+import ModalListaEmpleados from '../components/Nomina/ModalListaEmpleados';
+import BarraOpciones from '../components/BarraOpciones';
+import useImageUpload from '../Hooks/useImageUpload'; // Importamos el hook
 
-const Container = styled(View)
-const StyledTextInput = styled(TextInput)
-const StyledText = styled(Text)
+const Container = styled(View);
+const StyledTextInput = styled(TextInput);
+const StyledText = styled(Text);
 
 export default function FormularioBitacora() {
-  const [detalles, setDetalles] = useState('')
-  const [idsEmpleadosSeleccionados, setidsEmpleadosSeleccionados] = useState([])
-  const [empleado, setEmpleado] = useState({})
-  const [empleados, setEmpleados] = useState([])
-  const [fotos, setFotos] = useState('')
-  const [modalVisible, setModalVisible] = useState(false)
-  const navigation = useNavigation()
-  const route = useRoute()
-  const { id } = route.params // ID del proyecto
+  const [detalles, setDetalles] = useState('');
+  const [idsEmpleadosSeleccionados, setidsEmpleadosSeleccionados] = useState([]);
+  const [empleado, setEmpleado] = useState({});
+  const [empleados, setEmpleados] = useState([]);
+  const [fotos, setFotos] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { id } = route.params; // ID del proyecto
+
+  const {
+    pickImageFromGallery,
+    takePhotoWithCamera,
+    handleUploadImage,
+    imageUri,
+    uploading,
+  } = useImageUpload();
 
   const handleSave = async () => {
     if (!detalles || idsEmpleadosSeleccionados.length === 0) {
-      Alert.alert('Error', 'Todos los campos son requeridos')
-      return
+      Alert.alert('Error', 'Todos los campos son requeridos');
+      return;
     }
 
     const newEntry = {
@@ -41,33 +51,33 @@ export default function FormularioBitacora() {
       detalles: detalles,
       fotos: fotos,
       empleados: idsEmpleadosSeleccionados,
-    }
+    };
 
     try {
-      await createBitacoraEntry(id, newEntry)
-      Alert.alert('Éxito', 'Entrada creada correctamente')
-      navigation.goBack() // Volver a la vista anterior
+      await createBitacoraEntry(id, newEntry);
+      Alert.alert('Éxito', 'Entrada creada correctamente');
+      navigation.goBack(); // Volver a la vista anterior
     } catch (error) {
-      Alert.alert('Error', 'No se pudo crear la entrada')
+      Alert.alert('Error', 'No se pudo crear la entrada');
     }
-  }
+  };
 
   // Función para obtener los empleados del proyecto cuando la modal se abra
   const fetchEmpleadosProyecto = useCallback(async () => {
     try {
-      const empleadosData = await getEmpleadosByProyecto(id)
-      setEmpleados(empleadosData)
+      const empleadosData = await getEmpleadosByProyecto(id);
+      setEmpleados(empleadosData);
     } catch (error) {
-      console.error('Error al obtener los empleados del proyecto:', error)
-      Alert.alert('Error', 'Ocurrió un error al obtener los empleados del proyecto')
+      console.error('Error al obtener los empleados del proyecto:', error);
+      Alert.alert('Error', 'Ocurrió un error al obtener los empleados del proyecto');
     }
-  }, [id])
+  }, [id]);
 
   // Función para manejar la apertura de la modal
   const handleOpenModal = () => {
-    fetchEmpleadosProyecto()
-    setModalVisible(true)
-  }
+    fetchEmpleadosProyecto();
+    setModalVisible(true);
+  };
 
   // Función para manejar la confirmación de la selección de empleados
   const handleConfirmSelection = (selectedEmpleados) => {
@@ -77,86 +87,128 @@ export default function FormularioBitacora() {
 
   // Función para manejar el cierre de la modal
   const handleCloseModal = () => {
-    setModalVisible(false)
-  }
+    setModalVisible(false);
+  };
 
-  const handleSubirFoto = async (uri) => {}
-  
+  const handleSelectImage = async () => {
+    Alert.alert(
+      'Subir Imagen',
+      'Elige una opción',
+      [
+        {
+          text: 'Galería',
+          onPress: async () => {
+            const uri = await pickImageFromGallery();
+            const uploadedUri = await handleUploadImage(uri);
+            if (uploadedUri) setFotos([...fotos, uploadedUri]); // Agregar la foto subida al array
+          },
+        },
+        {
+          text: 'Cámara',
+          onPress: async () => {
+            const uri = await takePhotoWithCamera();
+            const uploadedUri = await handleUploadImage(uri);
+            if (uploadedUri) setFotos([...fotos, uploadedUri]); // Agregar la foto subida al array
+          },
+        },
+        { text: 'Cancelar', style: 'cancel' },
+      ],
+      { cancelable: true }
+    );
+  };
+
   useEffect(() => {
     async function fetchEmpleado() {
-      const empleadoData = await getEmpleadoById(idsEmpleadosSeleccionados[0])
-      setEmpleado(empleadoData)
+      const empleadoData = await getEmpleadoById(idsEmpleadosSeleccionados[0]);
+      setEmpleado(empleadoData);
     }
   }, [idsEmpleadosSeleccionados]);
 
   return (
-    <SafeAreaView className='flex-1 bg-black'>
+    <SafeAreaView className="flex-1 bg-black">
       <BarraOpciones />
-      <ScrollView className='p-4'>
-        <StyledText className='text-xl text-yellow-400 font-semibold mb-4'>
+      <ScrollView className="p-4">
+        <StyledText className="text-xl text-yellow-400 font-semibold mb-4">
           Crear Entrada de Bitácora
         </StyledText>
 
         {/* Detalles */}
-        <StyledText className='text-white'>Detalles de la bitácora:</StyledText>
-        <Container className='mb-4'>
+        <StyledText className="text-white">Detalles de la bitácora:</StyledText>
+        <Container className="mb-4">
           <StyledTextInput
             value={detalles}
             onChangeText={setDetalles}
-            placeholder='Escribe los detalles'
-            placeholderTextColor='#facc15'
+            placeholder="Escribe los detalles"
+            placeholderTextColor="#facc15"
             multiline={true}
             numberOfLines={10}
             style={{ verticalAlign: 'top', height: 150 }}
-            className='text-white border-b border-yellow-400 p-2'
+            className="text-white border-b border-yellow-400 p-2"
           />
         </Container>
 
         {/* Empleados */}
-        <StyledText className='text-white'>Empleados en el día de hoy</StyledText>
+        <StyledText className="text-white">Empleados en el día de hoy</StyledText>
         <TouchableOpacity
           onPress={handleOpenModal}
-          className='bg-black rounded-full mb-4'
+          className="bg-black rounded-full mb-4"
           activeOpacity={0.7}
         >
-          <Text className='text-left border-b border-yellow-400 text-yellow-400 p-2'>
+          <Text className="text-left border-b border-yellow-400 text-yellow-400 p-2">
             Seleccionar empleados
           </Text>
         </TouchableOpacity>
 
         {/* Mostrar empleados seleccionados */}
         {empleados.length > 0 && (
-          <View className='mb-4'>
-            <StyledText className='text-white'>
+          <View className="mb-4">
+            <StyledText className="text-white">
               Empleados seleccionados:
             </StyledText>
             {empleados.map((empleado) => (
-              <StyledText key={empleado.id} className=' p-2 text-yellow-400'>
-                {empleado.Nombres} {empleado.Apellidos}, 
+              <StyledText key={empleado.id} className=" p-2 text-yellow-400">
+                {empleado.Nombres} {empleado.Apellidos},
               </StyledText>
             ))}
           </View>
         )}
 
         {/* Fotos */}
-        <StyledText className='text-white'>Fotos del trabajo realizado</StyledText>
+        <StyledText className="text-white">Fotos del trabajo realizado</StyledText>
         <TouchableOpacity
-          onPress={handleSubirFoto}
-          className='bg-black rounded-full mb-10'
+          onPress={handleSelectImage}
+          disabled={uploading}
+          className="bg-black rounded-full mb-10"
           activeOpacity={0.7}
         >
-          <Text className='text-left border-b border-yellow-400 text-yellow-400 p-2'>
-            Seleccionar fotos
+          <Text className="text-left border-b border-yellow-400 text-yellow-400 p-2">
+            {uploading ? 'Subiendo imagen...' : 'Seleccionar fotos'}
           </Text>
         </TouchableOpacity>
+
+        {/* Mostrar fotos seleccionadas */}
+        {fotos.length > 0 && (
+          <View className="mb-4">
+            <StyledText className="text-white">
+              Fotos seleccionadas:
+            </StyledText>
+            {fotos.map((fotoUri, index) => (
+              <Image
+                key={index}
+                source={{ uri: fotoUri }}
+                style={{ width: 100, height: 100 }}
+              />
+            ))}
+          </View>
+        )}
 
         {/* Botón Guardar */}
         <TouchableOpacity
           onPress={handleSave}
-          className='bg-yellow-400 p-4 rounded-full mb-10'
+          className="bg-yellow-400 p-4 rounded-full mb-10"
           activeOpacity={0.7}
         >
-          <Text className='text-center text-black font-bold'>Guardar</Text>
+          <Text className="text-center text-black font-bold">Guardar</Text>
         </TouchableOpacity>
       </ScrollView>
 
@@ -168,5 +220,5 @@ export default function FormularioBitacora() {
         onConfirm={handleConfirmSelection}
       />
     </SafeAreaView>
-  )
+  );
 }
