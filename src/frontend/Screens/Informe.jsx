@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react'
 import {
   View,
   Text,
-  Image,
   ActivityIndicator,
   Alert,
   ScrollView,
@@ -18,6 +17,7 @@ import {
 } from '../../Backend/services/InformeService'
 import { getAllInformes } from '../../Backend/services/InformeService'  // Importar el servicio para obtener el proyecto
 import BarraOpciones from '../components/BarraOpciones'
+import InformeEntry from '../components/informe/InformeEntry'
 
 export default function Informe() {
   const route = useRoute()
@@ -83,12 +83,6 @@ export default function Informe() {
     }
   }
 
-  const formatTimestamp = (timestamp) => {
-    if (!timestamp) return ''
-    const date = timestamp.toDate()
-    return date.toLocaleDateString()
-  }
-
   if (loading) {
     return (
       <SafeAreaView className='flex-1 bg-black'>
@@ -133,45 +127,7 @@ export default function Informe() {
       >
         <View className='space-y-4'>
           {/* Información del Informe */}
-          <View>
-            <Text className='text-yellow-400 text-2xl font-bold'>
-              {informe.NombreProyecto}
-            </Text>
-            <Text className='text-white mt-1'>
-              Número de Contrato: {informe.Contrato}
-            </Text>
-            <Text className='text-white'>
-              Desde: {formatTimestamp(informe.FechaInicio)} | Hasta: {formatTimestamp(informe.FechaFin)}
-            </Text>
-            <Image
-              source={{
-                uri: informe.FotoPrincipal || 'https://via.placeholder.com/150',
-              }}
-              className='w-full h-64 rounded-lg'
-              resizeMode='cover'
-            />
-            <Text className='text-white mt-1'>
-              Introducción: {informe.Introduccion}
-            </Text>
-            <Text className='text-white'>
-              Desarrollo: {informe.Desarrollo}
-            </Text>
-            <Text className='text-white mt-1'>
-              Presupuesto: {informe.Presupuesto}
-            </Text>
-            <Text className='text-white'>
-              Estado: {informe.Estado}
-            </Text>
-            <Text className='text-white mt-1'>
-              Fotos: {informe.Fotos}
-            </Text>
-            <Text className='text-white'>
-              Nomina: {informe.Nomina}
-            </Text>
-            <Text className='text-white mt-1'>
-              Contratistas: {informe.Contratistas}
-            </Text>
-          </View>
+          <InformeEntry informe={informe} />
         </View>
       </ScrollView>
     </SafeAreaView>
