@@ -1,22 +1,20 @@
-import { collection, addDoc, Timestamp } from 'firebase/firestore'; 
-import { firestore } from '../config/firebase'; // Configuración de Firestore
+import { collection, addDoc, Timestamp, getDocs, query, where } from 'firebase/firestore'; 
+import { firestore } from '../../../firebase'; // Configuración de Firestore
 
 // Validación de datos del informe
-const validateInformeData = (informeData) => {
+export const validateInformeData = (informeData) => {
   if (!informeData.projectName) throw new Error('El nombre del proyecto es obligatorio');
   if (!informeData.contract) throw new Error('El número de contrato es obligatorio');
   if (!informeData.startDate) throw new Error('La fecha de inicio es obligatoria');
   if (!informeData.endDate) throw new Error('La fecha de fin es obligatoria');
   if (!informeData.nominations || !Array.isArray(informeData.nominations) || informeData.nominations.length === 0) {
-    throw new Error('La nómina es obligatoria y debe contener al menos un empleado');
+    errorNomina = new Error('12',);
+    throw errorNomina;
   }
 };
 
 export const createInforme = async (projectId, informeData) => {
   try {
-    // Validar los datos antes de continuar
-    validateInformeData(informeData);
-
     const informeCollection = collection(firestore, `Proyectos/${projectId}/Informe`);
     
     // Verificar si el contrato ya existe
@@ -29,8 +27,8 @@ export const createInforme = async (projectId, informeData) => {
     const docRef = await addDoc(informeCollection, {
       NombreProyecto: informeData.projectName,
       Contrato: informeData.contract,
-      FechaInicio: informeData.startDate ? Timestamp.fromDate(new Date(informeData.startDate)) : null,
-      FechaFin: informeData.endDate ? Timestamp.fromDate(new Date(informeData.endDate)) : null,
+      FechaInicio: informeData.startDate ? informeData.startDate : null,
+      FechaFin: informeData.endDate ? informeData.endDate : null,
       FotoPrincipal: informeData.fotoPrincipal || '',
       Introduccion: informeData.introduction || '',
       Desarrollo: informeData.desarrollo || '',
@@ -144,6 +142,7 @@ export const getAllInformes = async (projectId) => {
   try {
     const informesCollection = collection(firestore, `Proyectos/${projectId}/Informe`);
     const querySnapshot = await getDocs(informesCollection);
+    
 
     const informes = querySnapshot.docs.map(doc => ({
       id: doc.id,

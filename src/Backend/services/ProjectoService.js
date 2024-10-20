@@ -1,6 +1,6 @@
 // services/projectService.js
 import { firestore } from '../../../firebase';
-import { collection, Timestamp, doc, addDoc, getDocs, getDoc, updateDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
+import { collection, Timestamp, doc, addDoc, getDocs, getDoc, updateDoc, deleteDoc, onSnapshot, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { deleteCollection } from './utils';
 
 // Crear un nuevo proyecto
@@ -114,4 +114,37 @@ export const subscribeToProjects = (callback) => {
 
   // Retornar la función de desuscripción
   return unsubscribe;
+};
+
+// Actualizar empleados de un proyecto
+export const updateProjectEmployees = async (projectId, empleadosIds) => {
+  try {
+    console.log(empleadosIds, 'empleadosIds', projectId)
+    const proyectoDoc = doc(firestore, 'Proyectos', projectId);
+
+    
+
+    // Actualizar el documento del proyecto con los empleados asignados
+    await updateDoc(proyectoDoc, {
+      Empleados: arrayUnion(empleadosIds),
+    });
+
+    console.log('Empleados actualizados correctamente en el proyecto.');
+  } catch (error) {
+    console.error('Error al actualizar los empleados del proyecto: ', error);
+    throw error;
+  }
+};
+
+export const eliminarEmpleadoAProyecto = async (proyectoId, empleadoId) => {
+  try {
+    const proyectoDoc = doc(firestore, 'Proyectos', proyectoId);
+    await updateDoc(proyectoDoc, {
+      Empleados: arrayRemove(empleadoId),
+    });
+    console.log('Empleado eliminado del proyecto.');
+  } catch (error) {
+    console.error('Error al eliminar el empleado del proyecto: ', error);
+    throw error;
+  }
 };

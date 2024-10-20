@@ -2,7 +2,6 @@
 import React, { useState, useContext } from "react";
 import { View, Pressable, Text, Modal, Alert } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { ChevronLeftIcon } from 'react-native-heroicons/outline'
 import { AuthContext } from "../../Backend/auth/authContext";
 import { signOut } from "firebase/auth";
 import { auth } from "../../../firebase";
