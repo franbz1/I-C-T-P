@@ -1,5 +1,6 @@
 import React, { useState, useContext } from 'react';
-import { Alert, Image, Pressable, SafeAreaView, Switch, Text, TextInput, View, ActivityIndicator } from 'react-native';
+import { Alert, Image, Pressable, Switch, Text, TextInput, View, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../../firebase";
 import { AuthContext } from '../../Backend/auth/authContext';
@@ -17,7 +18,6 @@ export default function Login() {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false); // Para manejar la visibilidad de la contraseña
     const { setUser } = useContext(AuthContext);
-    const navigation = useNavigation();
 
     const handleLogin = async () => {
         if (!email || !password) {

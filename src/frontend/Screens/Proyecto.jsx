@@ -1,57 +1,112 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+// screens/Proyecto.js
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  Image,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+} from 'react-native';
+import { useRoute } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { styled } from 'nativewind';
+import { getProjectById } from '../../Backend/services/ProjectoService';
+import BarraOpciones from '../components/BarraOpciones';
+import BotonNavegacionProyecto from '../components/Proyecto/BotonNavegacionProyecto';
+import Comentarios from '../components/Proyecto/Comentarios';
 
-const StyledView = styled(View)
-const StyledText = styled(Text)
-const StyledTouchableOpacity = styled(TouchableOpacity)
-const StyledScrollView = styled(ScrollView)
-const StyledSafeAreaView = styled(SafeAreaView)
+export default function Proyecto() {
+  const route = useRoute();
+  const { id } = route.params;
+  const [project, setProject] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-export default function ProjectManagement({ userRole = 'employee' }) {
-    const [projects, setProjects] = useState([
-        { id: 1, name: 'Project A', progress: 75 },
-        { id: 2, name: 'Project B', progress: 30 },
-        { id: 3, name: 'Project C', progress: 50 },
-    ]);
+  useEffect(() => {
+    const fetchProjectData = async () => {
+      try {
+        await fetchProject();
+      } catch (error) {
+        Alert.alert('Error', error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    fetchProjectData();
+  }, [id]);
+
+  const fetchProject = async () => {
+    const fetchedProject = await getProjectById(id);
+    setProject(fetchedProject);
+  };
+
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return '';
+    const date = timestamp.toDate(); // Firestore Timestamp tiene el método toDate()
+    return date.toLocaleDateString();
+  };
+
+  if (loading) {
     return (
-        <StyledSafeAreaView className="flex-1 bg-black">
-            <StyledView className="flex-row justify-between items-center p-4 border-b border-gray-700">
-                <StyledText className="text-2xl font-bold text-white">
-                    ICTP INGENIERIA
-                </StyledText>
-            </StyledView>
-            <StyledScrollView className="flex-1 p-4">
-                {projects.map((project) => (
-                    <StyledTouchableOpacity
-                        key={project.id}
-                        className="mb-4 p-4 rounded-lg bg-neutral-800 shadow-md"
-                    >
-                        <StyledText className="text-lg font-semibold mb-2 text-white">
-                            {project.name}
-                        </StyledText>
-                        <StyledView className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
-                            <StyledView
-                                style={{ width: `${project.progress}%` }}
-                                className="h-full bg-yellow-400"
-                            />
-                        </StyledView>
-                        <StyledText className="mt-2 text-gray-300">
-                            Progress: {project.progress}%
-                        </StyledText>
-                    </StyledTouchableOpacity>
-                ))}
-            </StyledScrollView>
-            
-            {userRole === 'employer' && (
-                <StyledTouchableOpacity
-                    className="absolute bottom-6 right-6 w-14 h-14 rounded-full bg-yellow-400 items-center justify-center shadow-lg"
-                >
-                    <StyledText className="text-black text-3xl">+</StyledText>
-                </StyledTouchableOpacity>
-            )}
-        </StyledSafeAreaView>
+      <View className='flex-1 justify-center items-center bg-black'>
+        <ActivityIndicator
+          size='large'
+          color='#FFD700'
+        />
+      </View>
     );
+  }
+
+  if (!project) {
+    return (
+      <View className='flex-1 justify-center items-center bg-black'>
+        <Text className='text-yellow-400 text-lg'>Proyecto no encontrado</Text>
+      </View>
+    );
+  }
+
+
+  return (
+    <SafeAreaView className='flex-1 bg-black'>
+      <BarraOpciones />
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        className='p-4'
+      >
+        <View className='space-y-4'>
+          {/* Información del Proyecto */}
+          <View>
+            <Text className='text-yellow-400 text-2xl font-bold'>
+              {project.Nombre}
+            </Text>
+            <Text className='text-white mt-1'>
+              Número de Contrato: {project.Contrato}
+            </Text>
+            <Text className='text-white'>
+              Desde: {formatTimestamp(project.FechaInicio)} | Hasta: {formatTimestamp(project.FechaFin)}
+            </Text>
+          </View>
+
+          {/* Imagen del Proyecto */}
+          <Image
+            source={{
+              uri: project.Imagen || 'https://via.placeholder.com/150',
+            }}
+            className='w-full h-64 rounded-lg'
+            resizeMode='cover'
+          />
+
+          {/* Botones de navegación */}
+          <View className='mt-6 space-y-2'>
+            <BotonNavegacionProyecto texto='Bitácora' ruta='Bitacora' id={id} />
+            <BotonNavegacionProyecto texto='Informe' ruta='Informe' id={id} />
+            <BotonNavegacionProyecto texto='Nómina Proyecto' ruta='NominaProyecto' id={id} />
+          </View>
+
+          {/* Sección de comentarios */}
+          <Comentarios projectId={id} />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
 }
