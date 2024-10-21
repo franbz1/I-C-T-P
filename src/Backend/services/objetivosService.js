@@ -4,17 +4,15 @@ import {
   doc,
   updateDoc,
   deleteDoc,
+  getDocs,
 } from 'firebase/firestore'
-import { firestore } from '../config/firebase'
+import { firestore } from '../../../firebase'
 
 // Validación de los datos de un objetivo
 const validateObjective = (objective) => {
   if (!objective.title) throw new Error('El título del objetivo es obligatorio')
   if (!objective.description)
     throw new Error('La descripción del objetivo es obligatoria')
-  if (typeof objective.resolved !== 'boolean') {
-    throw new Error('El estado del objetivo debe ser booleano (true o false)')
-  }
 }
 
 class ObjetivosService {
@@ -34,7 +32,7 @@ class ObjetivosService {
       const docRef = await addDoc(this.objectivesCollection, {
         Titulo: objectiveData.title,
         Descripcion: objectiveData.description,
-        Resuelto: objectiveData.resolved,
+        Completado: objectiveData.completed,
       })
 
       return { success: true, id: docRef.id } // Retornar el ID del objetivo creado
@@ -56,7 +54,7 @@ class ObjetivosService {
       await updateDoc(docRef, {
         Titulo: objectiveData.title,
         Descripcion: objectiveData.description,
-        Resuelto: objectiveData.resolved,
+        Completado: objectiveData.completed,
       })
 
       return { success: true, id: objectiveId } // Retornar el ID del objetivo actualizado
@@ -81,6 +79,39 @@ class ObjetivosService {
       )
     }
   }
+
+  async getObjectives(projectId, informeId) {
+    try {
+      const objetivosCollection = collection(firestore, `Proyectos/${projectId}/informe/${informeId}/Objetivos`);
+      const objetivosSnapshot = await getDocs(objetivosCollection);
+      const objetivosList = objetivosSnapshot.docs.map(doc => ({
+        ObjetivoID: doc.id,
+        ProyectoID: projectId,
+        ...doc.data(),
+      }));
+      
+      return objetivosList;
+    } catch (error) {
+      console.error('Error al obtener los objetivos:', error);
+      throw new Error('No se pudieron obtener los objetivos');
+    }
+  }
 }
+
+export const getObjetivoById = async (projectId, informeId, objetivoId) => {
+  try {
+    const objetivoDoc = doc(firestore, `Proyectos/${projectId}/informe/${informeId}/Objetivos`, objetivoId);
+    const objetivoSnapshot = await getDoc(objetivoDoc);
+    
+    if (!objetivoSnapshot.exists()) {
+      throw new Error('Objetivo no encontrado');
+    }
+
+    return { ObjetivoID: objetivoSnapshot.id, ProyectoID: projectId, ...objetivoSnapshot.data() };
+  } catch (error) {
+    console.error('Error al obtener el objetivo:', error);
+    throw new Error('No se pudo obtener el objetivo');
+  }
+};
 
 export default ObjetivosService

@@ -1,4 +1,4 @@
-// screens/Proyecto.js
+
 import React, { useEffect, useState } from 'react'
 import {
   View,
@@ -121,13 +121,14 @@ export default function Informe() {
   return (
     <SafeAreaView className='flex-1 bg-black'>
       <BarraOpciones />
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        className='p-4'
-      >
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} className='p-4'>
         <View className='space-y-4'>
-          {/* Información del Informe */}
-          <InformeEntry informe={informe} />
+          <InformeEntry id={id} informe={informe} />
+        </View>
+        <View className='space-y-4'>
+          <Text className='text-yellow-400 text-2xl font-bold mb-4'>
+            prueba
+          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>

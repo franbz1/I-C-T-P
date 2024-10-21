@@ -1,7 +1,8 @@
-import { View, Text, Image } from "react-native"
-import ProgressBar from "../ProgressBar" 
+import { View, Text, Image } from 'react-native'
+import ProgressBar from '../ProgressBar'
+import Objetivos from './Objetivos'
 
-function InformeEntry({ informe }) {
+function InformeEntry({ informe, id }) {  
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return ''
     const date = timestamp.toDate()
@@ -9,7 +10,7 @@ function InformeEntry({ informe }) {
   }
 
   return (
-    <View>
+    <View className='flex-1'>
       <ProgressBar estado={informe.Estado} />
       <Text className='text-yellow-400 text-center text-2xl font-bold'>
         {informe.NombreProyecto}
@@ -28,14 +29,18 @@ function InformeEntry({ informe }) {
         className='w-full h-64 rounded-lg'
         resizeMode='cover'
       />
-      <Text className='text-white text-xl mt-1 text-center'>
-        Introducción
+      <Text className='text-white text-xl mt-1 text-center'>Introducción</Text>
+      <Text className='text-white rounded-lg border-[1px] mb-2'>
+        {informe.Introduccion}
       </Text>
-      <Text className='text-white py-10 border-yellow-200 rounded-lg border-[1px]'>{informe.Introduccion}</Text>
-      <Text className='text-white'>Desarrollo: {informe.Desarrollo}</Text>
-      <Text className='text-white mt-1'>
-        Presupuesto: {informe.Presupuesto}
+      <Text className='text-white rounded-lg border-[1px]'>
+        {informe.Desarrollo}
       </Text>
+      <Objetivos id={id} informeId={informe.id} />
+      <View className='flex-row justify-between items-center'>
+        <Text className='text-white text-xl'>Presupuesto:</Text>
+        <Text className='text-white text-xl'>{informe.Presupuesto}</Text>
+      </View>
       <Text className='text-white mt-1'>Fotos: {informe.Fotos}</Text>
       <Text className='text-white'>Nomina: {informe.Nomina}</Text>
       <Text className='text-white mt-1'>
