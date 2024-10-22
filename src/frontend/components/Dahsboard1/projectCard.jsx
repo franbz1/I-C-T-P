@@ -3,7 +3,8 @@ import React from 'react';
 import { View, Text, Pressable, Image, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-export default function ProjectCard({ project, onDelete }) {    
+export default function ProjectCard({ project, onDelete }) {   
+    
     const navigation = useNavigation();
 
     const handleNavigate = () => {

@@ -2,7 +2,6 @@ import React from 'react';
 import { View, Text } from "react-native";
 import * as Progress from 'react-native-progress'; // Importamos la barra de progreso
 
-// Componente para la barra de progreso
 function ProgressBarComponent({ estado }) {
   const progress = estado / 100; // Convertimos el valor a un rango de 0 a 1
 
@@ -10,7 +9,7 @@ function ProgressBarComponent({ estado }) {
     <View className='mb-3'>
       <Text className='text-neutral-400 text-center text-sm mb-1'>
         Progreso actual {estado}%
-        </Text>
+      </Text>
       <Progress.Bar 
         progress={progress}
         width={null} 
@@ -21,6 +20,5 @@ function ProgressBarComponent({ estado }) {
     </View>
   );
 }
-
 
 export default ProgressBarComponent;

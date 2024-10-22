@@ -9,6 +9,23 @@ function InformeEntry({ informe, id }) {
     return date.toLocaleDateString()
   }
 
+function CalcularProgreso(objetivos){
+  if (objetivos === undefined || objetivos.length === 0){
+    return 0
+  }else{
+    let total = 0
+    objetivos.forEach(objetivo => {
+      if (objetivo.Completado){
+        total += 1
+      }
+    })
+    return total / objetivos.length
+  }
+}
+
+console.log(CalcularProgreso(informe.Objetivos))
+
+
   return (
     <View className='flex-1'>
       <ProgressBar estado={informe.Estado} />
@@ -36,7 +53,7 @@ function InformeEntry({ informe, id }) {
       <Text className='text-white rounded-lg border-[1px]'>
         {informe.Desarrollo}
       </Text>
-      <Objetivos id={id} informeId={informe.id} />
+      <Objetivos projectId={id} informeId={informe.id} />
       <View className='flex-row justify-between items-center'>
         <Text className='text-white text-xl'>Presupuesto:</Text>
         <Text className='text-white text-xl'>{informe.Presupuesto}</Text>
