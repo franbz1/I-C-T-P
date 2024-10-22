@@ -14,8 +14,9 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import {
   createInforme,
   validateInformeData,
+  getAllInformes
 } from '../../Backend/services/InformeService'
-import { getAllInformes } from '../../Backend/services/InformeService'  // Importar el servicio para obtener el proyecto
+import { getProjectById } from '../../Backend/services/ProjectoService'
 import BarraOpciones from '../components/BarraOpciones'
 import InformeEntry from '../components/informe/InformeEntry'
 

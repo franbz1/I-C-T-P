@@ -14,6 +14,8 @@ export const validateInformeData = (informeData) => {
 };
 
 export const createInforme = async (projectId, informeData) => {
+  console.log(projectId,informeData)
+  
   try {
     const informeCollection = collection(firestore, `Proyectos/${projectId}/Informe`);
     
