@@ -9,15 +9,18 @@ const AnimatedTouchableOpacity = Animatable.createAnimatableComponent(TouchableO
 const Button = styled(AnimatedTouchableOpacity);
 const ButtonText = styled(Animatable.Text);
 
+/* Boton agregar */
 const BotonAgregarBitacora = ({ id }) => {
   const navigation = useNavigation();
   const [isPressed, setIsPressed] = useState(false);
 
+  /* boton presionado */
   const handlePress = () => {
     setIsPressed(true);
     navigation.navigate('FormularioBitacora', {id: id});
   };
 
+/* funcion de animacion */
   const handlePressIn = () => {
     setIsPressed(true);
   };
@@ -26,6 +29,7 @@ const BotonAgregarBitacora = ({ id }) => {
     setIsPressed(false);
   };
 
+  /* render del boton */
   return (
     <Button
       className="bg-yellow-400 py-2 px-4 rounded-md items-center my-2 mx-3"
