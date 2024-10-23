@@ -23,7 +23,7 @@ import InformeEntry from '../components/informe/InformeEntry'
 export default function Informe() {
   const route = useRoute()
   const navigation = useNavigation()
-  const { id } = route.params
+  const { id, proyecto } = route.params
   const [informe, setInforme] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -124,7 +124,7 @@ export default function Informe() {
       <BarraOpciones />
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} className='p-4'>
         <View className='space-y-4'>
-          <InformeEntry id={id} informe={informe} />
+          <InformeEntry proyecto={proyecto} id={id} informe={informe} />
         </View>
         <View className='space-y-4'>
           <Text className='text-yellow-400 text-2xl font-bold mb-4'>

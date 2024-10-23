@@ -99,7 +99,7 @@ export default function Proyecto() {
           {/* Botones de navegación */}
           <View className='mt-6 space-y-2'>
             <BotonNavegacionProyecto texto='Bitácora' ruta='Bitacora' id={id} />
-            <BotonNavegacionProyecto texto='Informe' ruta='Informe' id={id} />
+            <BotonNavegacionProyecto proyecto={project} texto='Informe' ruta='Informe' id={id} />
             <BotonNavegacionProyecto texto='Nómina Proyecto' ruta='NominaProyecto' id={id} />
           </View>
 
