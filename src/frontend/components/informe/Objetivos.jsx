@@ -3,7 +3,7 @@ import { View, Text, TextInput, Pressable, ScrollView, Alert } from 'react-nativ
 import { PencilIcon } from 'react-native-heroicons/outline';
 import { subscribeToObjectives, createObjective, updateObjective, deleteObjective } from '../../../Backend/services/objetivosService';
 
-const Objetivos = ({ projectId, informeId }) => {
+const Objetivos = ({ projectId, informeId, actualObjectives }) => {
   const [objectives, setObjectives] = useState([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -15,6 +15,7 @@ const Objetivos = ({ projectId, informeId }) => {
   useEffect(() => {
     const unsubscribe = subscribeToObjectives(projectId, informeId, (fetchedObjectives) => {
       setObjectives(fetchedObjectives);
+      actualObjectives(fetchedObjectives);
     });
 
     return () => unsubscribe();

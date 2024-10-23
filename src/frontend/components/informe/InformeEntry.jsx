@@ -1,34 +1,38 @@
 import { View, Text, Image } from 'react-native'
+import { useState } from 'react'
 import ProgressBar from '../ProgressBar'
 import Objetivos from './Objetivos'
 
-function InformeEntry({ informe, id }) {  
+function InformeEntry({ informe, id }) {
+  const [Objetivos1, setObjetivos1] = useState([]);
+
+  const manejarObjetivos = (objetivos) => {
+    setObjetivos1(objetivos)
+  }
+
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return ''
     const date = timestamp.toDate()
     return date.toLocaleDateString()
   }
 
-function CalcularProgreso(objetivos){
-  if (objetivos === undefined || objetivos.length === 0){
-    return 0
-  }else{
-    let total = 0
-    objetivos.forEach(objetivo => {
-      if (objetivo.Completado){
-        total += 1
-      }
-    })
-    return total / objetivos.length
+  function CalcularProgreso(objetivos) {
+    if (objetivos === undefined || objetivos.length === 0) {
+      return 0
+    } else {
+      let total = 0
+      objetivos.forEach((objetivo) => {
+        if (objetivo.Completado) {
+          total += 1
+        }
+      })
+      return Math.round(total*100 / objetivos.length)
+    }
   }
-}
-
-console.log(CalcularProgreso(informe.Objetivos))
-
-
+  
   return (
     <View className='flex-1'>
-      <ProgressBar estado={informe.Estado} />
+      <ProgressBar estado={CalcularProgreso(Objetivos1)} />
       <Text className='text-yellow-400 text-center text-2xl font-bold'>
         {informe.NombreProyecto}
       </Text>
@@ -53,7 +57,11 @@ console.log(CalcularProgreso(informe.Objetivos))
       <Text className='text-white rounded-lg border-[1px]'>
         {informe.Desarrollo}
       </Text>
-      <Objetivos projectId={id} informeId={informe.id} />
+      <Objetivos
+        projectId={id}
+        informeId={informe.id}
+        actualObjectives={manejarObjetivos}
+      />
       <View className='flex-row justify-between items-center'>
         <Text className='text-white text-xl'>Presupuesto:</Text>
         <Text className='text-white text-xl'>{informe.Presupuesto}</Text>
