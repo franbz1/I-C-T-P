@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, ScrollView, Image, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, Pressable, ScrollView, Image, Alert } from 'react-native';
 import ImageViewing from 'react-native-image-viewing'; // Importar la librería
 import { deleteBitacoraEntry } from '../../../Backend/services/BitacoraService';
 import { getEmpleadoById } from '../../../Backend/services/Empleado'; // Importar el servicio para eliminar la entrada

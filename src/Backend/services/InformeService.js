@@ -88,23 +88,7 @@ export const updateInforme = async (projectId, informeId, informeData) => {
 
     const docRef = doc(firestore, `Proyectos/${projectId}/Informe/${informeId}`);
 
-    // Actualizar el documento con los datos proporcionados
-    const updatedData = {
-      ...(informeData.projectName && { NombreProyecto: informeData.projectName }),
-      ...(informeData.contract && { Contrato: informeData.contract }),
-      ...(informeData.startDate && { FechaInicio: Timestamp.fromDate(new Date(informeData.startDate)) }),
-      ...(informeData.endDate && { FechaFin: Timestamp.fromDate(new Date(informeData.endDate)) }),
-      ...(informeData.fotoPrincipal !== undefined && { FotoPrincipal: informeData.fotoPrincipal || '' }),
-      ...(informeData.introduction !== undefined && { Introduccion: informeData.introduction || '' }),
-      ...(informeData.desarrollo !== undefined && { Desarrollo: informeData.desarrollo || '' }),
-      ...(informeData.budget !== undefined && { Presupuesto: Math.round(informeData.budget * 100) || 0 }),
-      ...(informeData.state !== undefined && { Estado: informeData.state || 0 }),
-      ...(informeData.fotos !== undefined && { Fotos: informeData.fotos || [] }),
-      ...(informeData.nominations !== undefined && { Nomina: informeData.nominations || [] }),
-      ...(informeData.contractors !== undefined && { Contratistas: informeData.contractors || [] })
-    };
-
-    await updateDoc(docRef, updatedData);
+    await updateDoc(docRef, informeData)
 
     return { success: true, id: informeId }; // Retornar el ID del informe actualizado
   } catch (error) {
