@@ -4,14 +4,20 @@ import ProgressBar from '../ProgressBar'
 import Objetivos from './Objetivos'
 import Carousel from '../Carousel'
 import { updateInforme } from '../../../Backend/services/InformeService'
+import useImageUpload from '../../Hooks/useImageUpload'
 
 function InformeEntry({ informe, id, proyecto, isEditing }) {
   const [objetivos, setObjetivos] = useState([])
+  const [isUploading, setIsUploading] = useState(false)
+  const {
+    handleSelectImage,
+  } = useImageUpload()
 
   // Estados locales para los campos editables
   const [introduccion, setIntroduccion] = useState(informe.Introduccion || '')
   const [desarrollo, setDesarrollo] = useState(informe.Desarrollo || '')
   const [presupuesto, setPresupuesto] = useState(informe.Presupuesto || 0)
+  const [fotos, setFotos] = useState(informe.Fotos || [])
   const [contratistas, setContratistas] = useState(
     informe.Contratistas.join(', ') || ''
   )
@@ -68,11 +74,25 @@ function InformeEntry({ informe, id, proyecto, isEditing }) {
     }
   }
 
-  const handleAddImage = async (uri) => {}
+  const handleAddImage = async () => {
+    try {
+      setIsUploading(true)
+      const url = await handleSelectImage()
+      if (url) setFotos([...fotos, url])
+        console.log('Foto subida con éxito:', url, 'fotos:', fotos)
+        
+      const updatedInforme = { ...informe, Fotos: fotos }
+      //await updateInforme(proyecto.id, informe.id, updatedInforme)
+      
+      setIsUploading(false)
+    } catch (error) {
+      console.error('Error al subir la foto:', error)
+      alert('No se pudo subir la foto. Inténtalo de nuevo.')
+      setIsUploading(false)
+    }
+  }
 
   const handleRemoveImage = async (id) => {}
-
-  const isUploading = false
 
   return (
     <View className='flex-1'>

@@ -7,6 +7,7 @@ import { uploadImage } from '../../Backend/services/utils'; // La función que y
 const useImageUpload = () => {
   const [uploading, setUploading] = useState(false);
   const [imageUri, setImageUri] = useState(null);
+  const [uriUploaded, setUriUploaded] = useState(null);
 
   // Seleccionar imagen desde la galería
   const pickImageFromGallery = async () => {
@@ -54,12 +55,42 @@ const useImageUpload = () => {
     }
   };
 
+  const handleSelectImage = async () => {
+    let uriUploaded = null;
+    Alert.alert(
+      'Subir Imagen',
+      'Elige una opción',
+      [
+        {
+          text: 'Galería',
+          onPress: async () => {
+            const uri = await pickImageFromGallery();
+            uriUploaded = await handleUploadImage(uri);
+            
+          },
+        },
+        {
+          text: 'Cámara',
+          onPress: async () => {
+            const uri = await takePhotoWithCamera();
+            uriUploaded = await handleUploadImage(uri);
+          },
+        },
+        { text: 'Cancelar', style: 'cancel' },
+      ],
+      { cancelable: true }
+    );
+    return uriUploaded;
+  };
+
   return {
     imageUri,
     uploading,
     pickImageFromGallery,
     takePhotoWithCamera,
     handleUploadImage,
+    handleSelectImage,
+    uriUploaded,
   };
 };
 
