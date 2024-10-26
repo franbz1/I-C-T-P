@@ -1,19 +1,21 @@
 import { View, Text, Image, TextInput, Pressable } from 'react-native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ProgressBar from '../ProgressBar';
 import Objetivos from './Objetivos';
-import {PencilIcon} from 'react-native-heroicons/outline'
 import { updateInforme } from '../../../Backend/services/InformeService';
 
-function InformeEntry({ informe, id, proyecto }) {
+function InformeEntry({ informe, id, proyecto, isEditing }) {
   const [objetivos, setObjetivos] = useState([]);
-  const [isEditing, setIsEditing] = useState(false);
 
   // Estados locales para los campos editables
   const [introduccion, setIntroduccion] = useState(informe.Introduccion || '');
   const [desarrollo, setDesarrollo] = useState(informe.Desarrollo || '');
   const [presupuesto, setPresupuesto] = useState(informe.Presupuesto || 0);
   const [contratistas, setContratistas] = useState(informe.Contratistas.join(', ') || '');
+
+  useEffect(() => {
+    toggleEditMode();
+  }, [isEditing]);
 
   const manejarObjetivos = (objetivosActualizados) => {
     setObjetivos(objetivosActualizados);
@@ -32,7 +34,7 @@ function InformeEntry({ informe, id, proyecto }) {
   }
 
   const toggleEditMode = async () => {
-    if (isEditing) {
+    if (!isEditing) {
       const parsedBudget = parseFloat(presupuesto);
       if (isNaN(parsedBudget)) {
         alert('Por favor ingresa un presupuesto válido.');
@@ -61,7 +63,6 @@ function InformeEntry({ informe, id, proyecto }) {
         alert('No se pudo actualizar el informe. Inténtalo de nuevo.');
       }
     }
-    setIsEditing(!isEditing);
   };
 
   return (
@@ -138,9 +139,6 @@ function InformeEntry({ informe, id, proyecto }) {
       ) : (
         <Text className="text-white mb-2">{contratistas}</Text>
       )}
-      <Pressable className="absolute bottom-4 right-4 bg-yellow-500 rounded-full p-3 shadow-lg" text={isEditing ? "" : "Editar"} onPress={toggleEditMode} >
-      
-      </Pressable>
     </View>
   );
 }

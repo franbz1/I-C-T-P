@@ -26,6 +26,7 @@ export default function Informe() {
   const { id, proyecto } = route.params
   const [informe, setInforme] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [isEditing, setIsEditing] = useState(false)
 
   useEffect(() => {
     const fetchInformeData = async () => {
@@ -84,6 +85,10 @@ export default function Informe() {
     }
   }
 
+  const handleToggleEditMode = () => {
+    setIsEditing(prev => !prev)
+  }
+
   if (loading) {
     return (
       <SafeAreaView className='flex-1 bg-black'>
@@ -131,10 +136,11 @@ export default function Informe() {
             proyecto={proyecto}
             id={id}
             informe={informe}
+            isEditing={isEditing}
           />
         </View>
       </ScrollView>
-      <BotonEditInforme />
+      <BotonEditInforme CambioEditando={handleToggleEditMode} />
     </SafeAreaView>
   )
 }
