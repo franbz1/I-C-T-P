@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react'
 import {
   View,
@@ -14,11 +13,12 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import {
   createInforme,
   validateInformeData,
-  getAllInformes
+  getAllInformes,
 } from '../../Backend/services/InformeService'
 import { getProjectById } from '../../Backend/services/ProjectoService'
 import BarraOpciones from '../components/BarraOpciones'
 import InformeEntry from '../components/informe/InformeEntry'
+import BotonEditInforme from '../components/informe/BotonEditInforme'
 
 export default function Informe() {
   const route = useRoute()
@@ -122,16 +122,19 @@ export default function Informe() {
   return (
     <SafeAreaView className='flex-1 bg-black'>
       <BarraOpciones />
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} className='p-4'>
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        className='px-2'
+      >
         <View className='space-y-4'>
-          <InformeEntry proyecto={proyecto} id={id} informe={informe} />
-        </View>
-        <View className='space-y-4'>
-          <Text className='text-yellow-400 text-2xl font-bold mb-4'>
-            prueba
-          </Text>
+          <InformeEntry
+            proyecto={proyecto}
+            id={id}
+            informe={informe}
+          />
         </View>
       </ScrollView>
+      <BotonEditInforme />
     </SafeAreaView>
   )
 }
