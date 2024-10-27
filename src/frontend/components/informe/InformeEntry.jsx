@@ -92,7 +92,22 @@ function InformeEntry({ informe, id, proyecto, isEditing }) {
     }
   };
 
-  const handleRemoveImage = async (id) => {}
+  const handleRemoveImage = async (index) => {
+    try {
+      setIsUploading(true);
+
+      const updatedFotos = fotos.filter((_, i) => i !== index);
+      setFotos(updatedFotos);
+      const updatedInforme = { ...informe, Fotos: updatedFotos };
+      await updateInforme(proyecto.id, informe.id, updatedInforme);
+      alert('Foto eliminada correctamente');
+      setIsUploading(false);
+    } catch (error) {
+      console.error('error al elimnar la foto:', error);
+      alert('No se pudo eliminar la foto. Inténtalo de nuevo.');
+      setIsUploading(false);
+    }
+  }
 
   return (
     <View className='flex-1'>

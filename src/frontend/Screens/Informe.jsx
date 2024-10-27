@@ -139,6 +139,9 @@ export default function Informe() {
             isEditing={isEditing}
           />
         </View>
+        <View>
+          
+        </View>
       </ScrollView>
       <BotonEditInforme CambioEditando={handleToggleEditMode} />
     </SafeAreaView>
