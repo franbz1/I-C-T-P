@@ -3,11 +3,11 @@ import React from 'react';
 import { Pressable, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-const BotonNavegacionProyecto = ({ texto, ruta, id }) => {
+const BotonNavegacionProyecto = ({ texto, ruta, id, proyecto }) => {
   const navigation = useNavigation();
 
   const handlePress = () => {
-    navigation.navigate(ruta, {id: id});
+    navigation.navigate(ruta, {id: id, proyecto: proyecto});
   };
 
   // Asignar un color diferente basado en la ruta para mantener la consistencia visual

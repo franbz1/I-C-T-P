@@ -11,6 +11,7 @@ import {
   getEmpleadosByProyecto,
   eliminarProyectoAEmpleado,
 } from "../../Backend/services/Empleado";
+import { updateProjectEmployees, eliminarEmpleadoAProyecto } from "../../Backend/services/ProjectoService";
 import ModalListaEmpleados from "../components/Nomina/ModalListaEmpleados";
 
 export default function NominaProyecto() {
@@ -77,6 +78,7 @@ export default function NominaProyecto() {
       await eliminarProyectoAEmpleado(empleadoId, id);
       setEmpleadosProyecto((prevEmpleados) => prevEmpleados.filter((empleado) => empleado.id !== empleadoId));
       setEmpleados((prevEmpleados) => [...prevEmpleados, empleadosProyecto.find(e => e.id === empleadoId)]);
+      await eliminarEmpleadoAProyecto(id, empleadoId);
       console.log("Empleado eliminado del proyecto.");
     } catch (error) {
       console.error("Error al eliminar al empleado del proyecto: ", error);
@@ -90,19 +92,25 @@ export default function NominaProyecto() {
       const empleadosSeleccionados = empleados.filter((empleado) =>
         selectedEmpleados.includes(empleado.id)
       );
-
       await Promise.all(
         selectedEmpleados.map(async (empleadoId) => {
           await agregarProyectoAEmpleado(empleadoId, id);
         })
       );
-
+      await Promise.all(
+        selectedEmpleados.map(async (empleadoId) => {
+          await updateProjectEmployees(id, empleadoId);
+        })
+      )
+      // Actualiza el proyecto con los nuevos empleados asignados
+      const nuevosEmpleadosProyecto = [...empleadosProyecto, ...empleadosSeleccionados];
+      const empleadosIds = nuevosEmpleadosProyecto.map((emp) => emp.id); 
       // Actualizamos los empleados del proyecto y la lista disponible
-      setEmpleadosProyecto((prev) => [...prev, ...empleadosSeleccionados]);
+      setEmpleadosProyecto(nuevosEmpleadosProyecto);
       setEmpleados((prev) =>
         prev.filter((empleado) => !selectedEmpleados.includes(empleado.id))
       );
-
+  
       console.log("Empleados agregados correctamente al proyecto.");
     } catch (error) {
       console.error("Error al agregar empleados al proyecto: ", error);

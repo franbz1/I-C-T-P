@@ -5,6 +5,7 @@ import Collapsible from 'react-native-collapsible';
 import * as Animatable from 'react-native-animatable';
 
 export default function ProjectCard({ project, onDelete }) {
+
     const navigation = useNavigation();
     const [isCollapsed, setIsCollapsed] = useState(false);
 
