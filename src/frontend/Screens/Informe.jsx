@@ -6,6 +6,7 @@ import {
   Alert,
   ScrollView,
   Pressable,
+  TouchableOpacity,
 } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import { useRoute } from '@react-navigation/native'
@@ -19,6 +20,7 @@ import { getProjectById } from '../../Backend/services/ProjectoService'
 import BarraOpciones from '../components/BarraOpciones'
 import InformeEntry from '../components/informe/InformeEntry'
 import BotonEditInforme from '../components/informe/BotonEditInforme'
+import useExportarInforme from '../Hooks/ExportarInforme'
 
 export default function Informe() {
   const route = useRoute()
@@ -138,9 +140,6 @@ export default function Informe() {
             informe={informe}
             isEditing={isEditing}
           />
-        </View>
-        <View>
-          
         </View>
       </ScrollView>
       <BotonEditInforme CambioEditando={handleToggleEditMode} />

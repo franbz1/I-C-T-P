@@ -1,17 +1,17 @@
-import { View, Text, Image, TextInput, Pressable } from 'react-native'
+import { View, Text, Image, TextInput, Pressable, TouchableOpacity } from 'react-native'
 import { useEffect, useState } from 'react'
 import ProgressBar from '../ProgressBar'
 import Objetivos from './Objetivos'
 import Carousel from '../Carousel'
 import { updateInforme } from '../../../Backend/services/InformeService'
 import useImageUpload from '../../Hooks/useImageUpload'
+import useExportarInforme from '../../Hooks/ExportarInforme'
 
 function InformeEntry({ informe, id, proyecto, isEditing }) {
   const [objetivos, setObjetivos] = useState([])
   const [isUploading, setIsUploading] = useState(false)
-  const {
-    handleSelectImage,
-  } = useImageUpload()
+  const { handleSelectImage } = useImageUpload()
+  const { handleExportaInforme } = useExportarInforme()
 
   // Estados locales para los campos editables
   const [introduccion, setIntroduccion] = useState(informe.Introduccion || '')
@@ -76,37 +76,41 @@ function InformeEntry({ informe, id, proyecto, isEditing }) {
 
   const handleAddImage = async () => {
     try {
-      setIsUploading(true);
-      const url = await handleSelectImage();
+      setIsUploading(true)
+      const url = await handleSelectImage()
       if (url) {
-        const updatedFotos = [...fotos, url];
-        setFotos(updatedFotos); // Actualizar fotos en el frontend
-        const updatedInforme = { ...informe, Fotos: updatedFotos }; // Actualizar informe con las nuevas fotos
-        await updateInforme(proyecto.id, informe.id, updatedInforme);
+        const updatedFotos = [...fotos, url]
+        setFotos(updatedFotos) // Actualizar fotos en el frontend
+        const updatedInforme = { ...informe, Fotos: updatedFotos } // Actualizar informe con las nuevas fotos
+        await updateInforme(proyecto.id, informe.id, updatedInforme)
       }
     } catch (error) {
-      console.error('Error al subir la foto:', error);
-      alert('No se pudo subir la foto. Inténtalo de nuevo.');
+      console.error('Error al subir la foto:', error)
+      alert('No se pudo subir la foto. Inténtalo de nuevo.')
     } finally {
-      setIsUploading(false);
+      setIsUploading(false)
     }
-  };
+  }
 
   const handleRemoveImage = async (index) => {
     try {
-      setIsUploading(true);
+      setIsUploading(true)
 
-      const updatedFotos = fotos.filter((_, i) => i !== index);
-      setFotos(updatedFotos);
-      const updatedInforme = { ...informe, Fotos: updatedFotos };
-      await updateInforme(proyecto.id, informe.id, updatedInforme);
-      alert('Foto eliminada correctamente');
-      setIsUploading(false);
+      const updatedFotos = fotos.filter((_, i) => i !== index)
+      setFotos(updatedFotos)
+      const updatedInforme = { ...informe, Fotos: updatedFotos }
+      await updateInforme(proyecto.id, informe.id, updatedInforme)
+      alert('Foto eliminada correctamente')
+      setIsUploading(false)
     } catch (error) {
-      console.error('error al elimnar la foto:', error);
-      alert('No se pudo eliminar la foto. Inténtalo de nuevo.');
-      setIsUploading(false);
+      console.error('error al elimnar la foto:', error)
+      alert('No se pudo eliminar la foto. Inténtalo de nuevo.')
+      setIsUploading(false)
     }
+  }
+
+  const exportarInforme = async () => {
+    handleExportaInforme(id, informe.id, objetivos)
   }
 
   return (
@@ -192,13 +196,20 @@ function InformeEntry({ informe, id, proyecto, isEditing }) {
         <Text className='text-white mb-2'>{contratistas}</Text>
       )}
       <Carousel
-        className="mb-2"
+        className='mb-2'
         images={fotos}
         onAddImage={handleAddImage}
         onRemoveImage={handleRemoveImage}
         isUploading={isUploading}
         isEditable={true}
       />
+
+      <TouchableOpacity
+        className='bg-yellow-400 rounded-lg p-2 mt-4'
+        onPress={exportarInforme}
+      >
+        <Text className='text-white text-center'>Exportar Informe</Text>
+      </TouchableOpacity>
     </View>
   )
 }

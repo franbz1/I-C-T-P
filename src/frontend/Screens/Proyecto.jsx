@@ -42,7 +42,7 @@ export default function Proyecto() {
 
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return '';
-    const date = timestamp.toDate(); // Firestore Timestamp tiene el método toDate()
+    const date = timestamp.toDate();
     return date.toLocaleDateString();
   };
 

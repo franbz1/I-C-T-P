@@ -1,4 +1,4 @@
-import { collection, addDoc, Timestamp, getDocs, query, where, doc, updateDoc } from 'firebase/firestore'; 
+import { collection, addDoc, Timestamp, getDocs, query, where, doc, updateDoc, getDoc } from 'firebase/firestore'; 
 import { firestore } from '../../../firebase'; // Configuración de Firestore
 
 // Validación de datos del informe
