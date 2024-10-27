@@ -76,21 +76,21 @@ function InformeEntry({ informe, id, proyecto, isEditing }) {
 
   const handleAddImage = async () => {
     try {
-      setIsUploading(true)
-      const url = await handleSelectImage()
-      if (url) setFotos([...fotos, url])
-        console.log('Foto subida con éxito:', url, 'fotos:', fotos)
-        
-      const updatedInforme = { ...informe, Fotos: fotos }
-      //await updateInforme(proyecto.id, informe.id, updatedInforme)
-      
-      setIsUploading(false)
+      setIsUploading(true);
+      const url = await handleSelectImage();
+      if (url) {
+        const updatedFotos = [...fotos, url];
+        setFotos(updatedFotos); // Actualizar fotos en el frontend
+        const updatedInforme = { ...informe, Fotos: updatedFotos }; // Actualizar informe con las nuevas fotos
+        await updateInforme(proyecto.id, informe.id, updatedInforme);
+      }
     } catch (error) {
-      console.error('Error al subir la foto:', error)
-      alert('No se pudo subir la foto. Inténtalo de nuevo.')
-      setIsUploading(false)
+      console.error('Error al subir la foto:', error);
+      alert('No se pudo subir la foto. Inténtalo de nuevo.');
+    } finally {
+      setIsUploading(false);
     }
-  }
+  };
 
   const handleRemoveImage = async (id) => {}
 
@@ -178,7 +178,7 @@ function InformeEntry({ informe, id, proyecto, isEditing }) {
       )}
       <Carousel
         className="mb-2"
-        images={informe.Fotos}
+        images={fotos}
         onAddImage={handleAddImage}
         onRemoveImage={handleRemoveImage}
         isUploading={isUploading}

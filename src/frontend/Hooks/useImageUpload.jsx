@@ -55,33 +55,35 @@ const useImageUpload = () => {
     }
   };
 
-  const handleSelectImage = async () => {
-    let uriUploaded = null;
-    Alert.alert(
-      'Subir Imagen',
-      'Elige una opción',
-      [
-        {
-          text: 'Galería',
-          onPress: async () => {
-            const uri = await pickImageFromGallery();
-            uriUploaded = await handleUploadImage(uri);
-            
+  const handleSelectImage = () => {
+    return new Promise((resolve) => {
+      Alert.alert(
+        'Subir Imagen',
+        'Elige una opción',
+        [
+          {
+            text: 'Galería',
+            onPress: async () => {
+              const uri = await pickImageFromGallery();
+              const uriUploaded = await handleUploadImage(uri);
+              resolve(uriUploaded); // Retorna la URL subida
+            },
           },
-        },
-        {
-          text: 'Cámara',
-          onPress: async () => {
-            const uri = await takePhotoWithCamera();
-            uriUploaded = await handleUploadImage(uri);
+          {
+            text: 'Cámara',
+            onPress: async () => {
+              const uri = await takePhotoWithCamera();
+              const uriUploaded = await handleUploadImage(uri);
+              resolve(uriUploaded); // Retorna la URL subida
+            },
           },
-        },
-        { text: 'Cancelar', style: 'cancel' },
-      ],
-      { cancelable: true }
-    );
-    return uriUploaded;
+          { text: 'Cancelar', style: 'cancel', onPress: () => resolve(null) },
+        ],
+        { cancelable: true }
+      );
+    });
   };
+  
 
   return {
     imageUri,
