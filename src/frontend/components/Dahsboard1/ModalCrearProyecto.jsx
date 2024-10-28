@@ -39,8 +39,9 @@ export default function ModalCrearProyecto({ visible, onClose, onProjectAdded })
 
     try {
       const newProjectId = await createProject(projectData);
-      onProjectAdded({ id: newProjectId, ...projectData });
-      setNewProject({ contractNumber: '', name: '', startDate: '', endDate: '', image: '' });
+      projectData.id = newProjectId;
+      onProjectAdded({...projectData });
+      setNewProject({ contractNumber: '', name: '', startDate: '', endDate: '', image: ''});
       handleCloseModal();
     } catch {
       Alert.alert('Error', 'No se pudo añadir el proyecto.');
