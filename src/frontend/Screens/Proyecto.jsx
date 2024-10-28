@@ -1,5 +1,5 @@
 // screens/Proyecto.js
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,6 +15,36 @@ import BarraOpciones from '../components/BarraOpciones';
 import BotonNavegacionProyecto from '../components/Proyecto/BotonNavegacionProyecto';
 import Comentarios from '../components/Proyecto/Comentarios';
 
+const LoadingIndicator = () => (
+  <View className="flex-1 justify-center items-center bg-black">
+    <ActivityIndicator size="large" color="#FFD700" />
+  </View>
+);
+
+const NotFoundMessage = () => (
+  <View className="flex-1 justify-center items-center bg-black">
+    <Text className="text-yellow-400 text-lg">Proyecto no encontrado</Text>
+  </View>
+);
+
+const ProjectInfo = ({ nombre, contrato, fechaInicio, fechaFin }) => (
+  <View>
+    <Text className="text-yellow-400 text-2xl font-bold">{nombre}</Text>
+    <Text className="text-white mt-1">Número de Contrato: {contrato}</Text>
+    <Text className="text-white">
+      Desde: {fechaInicio} | Hasta: {fechaFin}
+    </Text>
+  </View>
+);
+
+const ProjectImage = ({ imageUrl }) => (
+  <Image
+    source={{ uri: imageUrl || 'https://via.placeholder.com/150' }}
+    className="mt-2 w-full h-64 rounded-lg"
+    resizeMode="cover"
+  />
+);
+
 export default function Proyecto() {
   const route = useRoute();
   const { id } = route.params;
@@ -22,88 +52,47 @@ export default function Proyecto() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProjectData = async () => {
+    const fetchProject = async () => {
       try {
-        await fetchProject();
+        const fetchedProject = await getProjectById(id);
+        setProject(fetchedProject);
       } catch (error) {
         Alert.alert('Error', error.message);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchProjectData();
+    fetchProject();
   }, [id]);
-
-  const fetchProject = async () => {
-    const fetchedProject = await getProjectById(id);
-    setProject(fetchedProject);
-  };
 
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return '';
-    const date = timestamp.toDate();
-    return date.toLocaleDateString();
+    return timestamp.toDate().toLocaleDateString();
   };
 
-  if (loading) {
-    return (
-      <View className='flex-1 justify-center items-center bg-black'>
-        <ActivityIndicator
-          size='large'
-          color='#FFD700'
-        />
-      </View>
-    );
-  }
+  const fechaInicio = useMemo(() => formatTimestamp(project?.FechaInicio), [project?.FechaInicio]);
+  const fechaFin = useMemo(() => formatTimestamp(project?.FechaFin), [project?.FechaFin]);
 
-  if (!project) {
-    return (
-      <View className='flex-1 justify-center items-center bg-black'>
-        <Text className='text-yellow-400 text-lg'>Proyecto no encontrado</Text>
-      </View>
-    );
-  }
-
+  if (loading) return <LoadingIndicator />;
+  if (!project) return <NotFoundMessage />;
 
   return (
-    <SafeAreaView className='flex-1 bg-black'>
+    <SafeAreaView className="flex-1 bg-black">
       <BarraOpciones />
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        className='p-4'
-      >
-        <View className='space-y-4'>
-          {/* Información del Proyecto */}
-          <View>
-            <Text className='text-yellow-400 text-2xl font-bold'>
-              {project.Nombre}
-            </Text>
-            <Text className='text-white mt-1'>
-              Número de Contrato: {project.Contrato}
-            </Text>
-            <Text className='text-white'>
-              Desde: {formatTimestamp(project.FechaInicio)} | Hasta: {formatTimestamp(project.FechaFin)}
-            </Text>
-          </View>
-
-          {/* Imagen del Proyecto */}
-          <Image
-            source={{
-              uri: project.Imagen || 'https://via.placeholder.com/150',
-            }}
-            className='w-full h-64 rounded-lg'
-            resizeMode='cover'
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="p-4">
+        <View className="space-y-4">
+          <ProjectInfo
+            nombre={project.Nombre}
+            contrato={project.Contrato}
+            fechaInicio={fechaInicio}
+            fechaFin={fechaFin}
           />
-
-          {/* Botones de navegación */}
-          <View className='mt-6 space-y-2'>
-            <BotonNavegacionProyecto texto='Bitácora' ruta='Bitacora' id={id} />
-            <BotonNavegacionProyecto proyecto={project} texto='Informe' ruta='Informe' id={id} />
-            <BotonNavegacionProyecto texto='Nómina Proyecto' ruta='NominaProyecto' id={id} />
+          <ProjectImage imageUrl={project.Imagen} />
+          <View className="mt-6 space-y-2">
+            <BotonNavegacionProyecto texto="Bitácora" ruta="Bitacora" id={id} />
+            <BotonNavegacionProyecto proyecto={project} texto="Informe" ruta="Informe" id={id} />
+            <BotonNavegacionProyecto texto="Nómina Proyecto" ruta="NominaProyecto" id={id} />
           </View>
-
-          {/* Sección de comentarios */}
           <Comentarios projectId={id} />
         </View>
       </ScrollView>

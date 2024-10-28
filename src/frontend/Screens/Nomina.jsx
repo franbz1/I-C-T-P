@@ -1,61 +1,85 @@
-import React, { useState, useEffect } from "react";
-import { ScrollView, Alert, Text, View } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import React, { useState, useEffect, useCallback } from "react";
+import { ScrollView, Alert, Text, View, ActivityIndicator } from "react-native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BarraOpciones from "../components/BarraOpciones";
 import EmpleadoList from "../components/Nomina/EmpleadoList";
 import AgregarEmpleadoBoton from "../components/Nomina/AgregarEmpleadoBoton";
-import { getEmpleados } from "../../Backend/services/Empleado";
+import { getEmpleados, deleteEmpleado } from "../../Backend/services/Empleado";
 
 export default function Nomina() {
   const [empleados, setEmpleados] = useState([]);
   const [expandedId, setExpandedId] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
 
-  // Función para obtener los empleados desde Firestore
-  const fetchEmpleados = async () => {
+  const fetchEmpleados = useCallback(async () => {
+    setLoading(true);
     try {
       const empleadosData = await getEmpleados();
-      setEmpleados(empleadosData); // Actualiza el estado con los empleados obtenidos
+      setEmpleados(empleadosData);
     } catch (error) {
-      console.error("Error al obtener los empleados: ", error);
+      console.error("Error al obtener los empleados:", error);
       Alert.alert("Error", "Ocurrió un error al obtener la lista de empleados");
+    } finally {
+      setLoading(false);
     }
-  };
-
-  // Se ejecuta cuando se monta el componente
-  useEffect(() => {
-    fetchEmpleados(); // Llamar a la función para obtener empleados
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchEmpleados();
+    }, [fetchEmpleados])
+  );
+
   const toggleExpand = (id) => {
-    setExpandedId(expandedId === id ? null : id);
+    setExpandedId((prevId) => (prevId === id ? null : id));
   };
 
   const handleDelete = (id) => {
-    console.log("Eliminar empleado con ID:", id);
-    // Aquí puedes llamar a la función de eliminar empleado si es necesario
+    Alert.alert(
+      "Eliminar Empleado",
+      "¿Estás seguro de que deseas eliminar este empleado?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Eliminar", style: "destructive", onPress: () => {
+          try {
+            deleteEmpleado(id)
+            setEmpleados(prevEmpleados => prevEmpleados.filter(empleado => empleado.id !== id))
+            alert('Empleado eliminado con éxito')
+          } catch (error) {
+            alert('Error al eliminar el empleado')
+            console.error('Error al eliminar el empleado:', error)
+          }
+        } },
+      ]
+    );
   };
 
-  const handleAddEmployee = () => {
-    navigation.navigate("AgregarEmpleado");
-  };
+  const handleAddEmployee = () => navigation.navigate("AgregarEmpleado");
 
   return (
     <SafeAreaView className="flex-1 bg-black">
       <BarraOpciones />
-      <ScrollView className="flex-1 bg-black">
-        <View className='p-4'>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="bg-black">
+        <View className="p-4">
           <Text className="text-2xl text-yellow-400 font-bold mb-4">
             Nómina de Empleados
           </Text>
-          <EmpleadoList
-            empleados={empleados} // Usa los empleados obtenidos desde Firestore
-            expandedId={expandedId}
-            toggleExpand={toggleExpand}
-            handleDelete={handleDelete}
-            allowEdit={true}
-          />
+          {loading ? (
+            <View className="flex-1 justify-center items-center mt-5">
+              <ActivityIndicator size="large" color="#FBBF24" />
+              <Text className="text-yellow-400 mt-2">Cargando empleados...</Text>
+            </View>
+          ) : (
+            <EmpleadoList
+              empleados={empleados}
+              expandedId={expandedId}
+              toggleExpand={toggleExpand}
+              handleDelete={handleDelete}
+              allowEdit
+            />
+          )}
           <AgregarEmpleadoBoton handleAddEmployee={handleAddEmployee} />
         </View>
       </ScrollView>

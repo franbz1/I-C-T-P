@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
-import { View, Text, Pressable, ScrollView, Image, TouchableOpacity, Alert } from 'react-native';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { View, Text, Pressable, ScrollView, Image, Alert, TouchableOpacity } from 'react-native';
 import ImageViewing from 'react-native-image-viewing';
 import Collapsible from 'react-native-collapsible';
 import * as Animatable from 'react-native-animatable';
 import { deleteBitacoraEntry } from '../../../Backend/services/BitacoraService';
 import { getEmpleadoById } from '../../../Backend/services/Empleado';
 
-export default function BitacoraEntry({ item, expandedEntry, toggleEntry, projectId, onEntryDeleted }) {
+const BitacoraEntry = ({ item, expandedEntry, toggleEntry, projectId, onEntryDeleted }) => {
   const [isImageViewVisible, setIsImageViewVisible] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [empleadoNombres, setEmpleadoNombres] = useState([]);
 
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     try {
       await deleteBitacoraEntry(projectId, item.id);
       onEntryDeleted(item.id);
@@ -19,14 +20,46 @@ export default function BitacoraEntry({ item, expandedEntry, toggleEntry, projec
       console.error('Error al eliminar la entrada:', error);
       Alert.alert('Error', 'No se pudo eliminar la entrada.');
     }
-  };
+  }, [projectId, item.id, onEntryDeleted]);
 
-  const openImageViewer = (index) => {
+  const confirmDelete = useCallback(() => {
+    Alert.alert(
+      'Confirmación',
+      '¿Estás seguro de que deseas eliminar esta entrada?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Eliminar', onPress: handleDelete, style: 'destructive' },
+      ],
+      { cancelable: true }
+    );
+  }, [handleDelete]);
+
+  const openImageViewer = useCallback((index) => {
     setCurrentImageIndex(index);
     setIsImageViewVisible(true);
-  };
+  }, []);
 
-  const images = item.Fotos ? item.Fotos.map((foto) => ({ uri: foto })) : [];
+  const images = useMemo(() => item.Fotos?.map((foto) => ({ uri: foto })) || [], [item.Fotos]);
+
+  useEffect(() => {
+    const fetchEmpleadoNombres = async () => {
+      try {
+        const nombres = await Promise.all(
+          item.Empleados.map(async (empleadoId) => {
+            const empleado = await getEmpleadoById(empleadoId);
+            return empleado.Nombres;
+          })
+        );
+        setEmpleadoNombres(nombres);
+      } catch (error) {
+        console.error("Error al obtener nombres de empleados:", error);
+      }
+    };
+
+    if (item.Empleados && item.Empleados.length > 0) {
+      fetchEmpleadoNombres();
+    }
+  }, [item.Empleados]);
 
   return (
     <Animatable.View 
@@ -60,9 +93,9 @@ export default function BitacoraEntry({ item, expandedEntry, toggleEntry, projec
             <Text className="font-semibold text-yellow-400">Detalles:</Text> {item.Detalles}
           </Text>
 
-          {item.Empleados && item.Empleados.length > 0 && (
+          {empleadoNombres.length > 0 && (
             <Text className="text-white mb-2">
-              <Text className="font-semibold text-yellow-400">Empleados:</Text> {item.Empleados.join(', ')}
+              <Text className="font-semibold text-yellow-400">Empleados:</Text> {empleadoNombres.join(', ')}
             </Text>
           )}
 
@@ -86,13 +119,13 @@ export default function BitacoraEntry({ item, expandedEntry, toggleEntry, projec
             </ScrollView>
           )}
 
-          <Animatable.View animation="bounceIn" delay={300}>
-            <Pressable
-              onPress={handleDelete}
-              className="bg-red-600 rounded-lg p-2 mt-4 w-40 self-end"
+          <Animatable.View animation="bounceIn" delay={300} className="self-end mt-4">
+            <TouchableOpacity
+              onPress={confirmDelete}
+              className="bg-red-600 rounded-lg p-2 w-40 active:opacity-70"
             >
               <Text className="text-white text-center">Eliminar entrada</Text>
-            </Pressable>
+            </TouchableOpacity>
           </Animatable.View>
         </Animatable.View>
       </Collapsible>
@@ -105,4 +138,6 @@ export default function BitacoraEntry({ item, expandedEntry, toggleEntry, projec
       />
     </Animatable.View>
   );
-}
+};
+
+export default React.memo(BitacoraEntry);

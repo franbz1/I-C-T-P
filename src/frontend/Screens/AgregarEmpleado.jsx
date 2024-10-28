@@ -7,41 +7,97 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  Image,
+  ActivityIndicator,
 } from 'react-native'
 import BarraOpciones from '../components/BarraOpciones'
 import { createEmpleado } from '../../Backend/services/Empleado'
+import useImageUpload from '../Hooks/useImageUpload'
+
+const initialEmpleadoData = {
+  cedula: '',
+  nombres: '',
+  apellidos: '',
+  correo: '',
+  telefono: '',
+  direccion: '',
+  nombresAcudiente: '',
+  telefonoAcudiente: '',
+  seguroLaboral: '',
+  eps: '',
+  tipoSangineo: '',
+  cargo: '',
+  foto: '',
+}
 
 const AgregarEmpleado = ({ navigation }) => {
-  const [empleadoData, setEmpleadoData] = useState({
-    cedula: '',
-    nombres: '',
-    apellidos: '',
-    correo: '',
-    telefono: '',
-    direccion: '',
-    nombresAcudiente: '',
-    telefonoAcudiente: '',
-    seguroLaboral: '',
-    eps: '',
-    tipoSangineo: '',
-    cargo: '',
-    foto: '', // URL de la foto (opcional)
-  })
+  const [empleadoData, setEmpleadoData] = useState(initialEmpleadoData)
+  const { uploading, handleSelectImage } = useImageUpload()
 
   const handleInputChange = (key, value) => {
-    setEmpleadoData({ ...empleadoData, [key]: value })
+    setEmpleadoData((prevData) => ({ ...prevData, [key]: value }))
+  }
+
+  const validateFields = () => {
+    const { cedula, nombres, apellidos, correo, telefono } = empleadoData
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    const phoneRegex = /^\d{7,10}$/
+
+    if (!cedula || cedula.length < 6) {
+      Alert.alert('Error', 'La cédula debe tener al menos 6 caracteres.')
+      return false
+    }
+    if (!nombres.trim()) {
+      Alert.alert('Error', 'Por favor, ingrese los nombres.')
+      return false
+    }
+    if (!apellidos.trim()) {
+      Alert.alert('Error', 'Por favor, ingrese los apellidos.')
+      return false
+    }
+    if (!correo || !emailRegex.test(correo)) {
+      Alert.alert('Error', 'Ingrese un correo electrónico válido.')
+      return false
+    }
+    if (!telefono || !phoneRegex.test(telefono)) {
+      Alert.alert('Error', 'Ingrese un teléfono válido (7-10 dígitos).')
+      return false
+    }
+    return true
   }
 
   const handleAgregarEmpleado = async () => {
+    if (!validateFields()) return
     try {
       await createEmpleado(empleadoData)
       Alert.alert('Éxito', 'Empleado agregado correctamente')
-      navigation.goBack() // Para volver a la pantalla anterior después de agregar el empleado
+      navigation.goBack()
     } catch (error) {
       Alert.alert('Error', 'Ocurrió un error al agregar el empleado')
       console.error('Error al agregar el empleado: ', error)
     }
   }
+
+  const seleccionarImagen = async () => {
+    const url = await handleSelectImage()
+    if (url) {
+      handleInputChange('foto', url)
+    }
+  }
+
+  const renderInput = (label, key, placeholder, keyboardType = 'default') => (
+    <View className='mb-4'>
+      <Text className='text-white'>{label}</Text>
+      <TextInput
+        value={empleadoData[key]}
+        onChangeText={(text) => handleInputChange(key, text)}
+        className='text-white border-b border-yellow-400 p-2'
+        placeholder={placeholder}
+        placeholderTextColor='#facc15'
+        keyboardType={keyboardType}
+      />
+    </View>
+  )
 
   return (
     <SafeAreaView className='flex-1 bg-black'>
@@ -51,165 +107,54 @@ const AgregarEmpleado = ({ navigation }) => {
           Agregar Empleado
         </Text>
 
-        {/* Cedula */}
+        {renderInput('Cédula', 'cedula', 'Cédula', 'numeric')}
+        {renderInput('Nombres', 'nombres', 'Nombres')}
+        {renderInput('Apellidos', 'apellidos', 'Apellidos')}
+        {renderInput('Correo', 'correo', 'Correo', 'email-address')}
+        {renderInput('Teléfono', 'telefono', 'Teléfono', 'phone-pad')}
+        {renderInput('Dirección', 'direccion', 'Dirección')}
+        {renderInput(
+          'Nombres del Acudiente',
+          'nombresAcudiente',
+          'Nombres del Acudiente'
+        )}
+        {renderInput(
+          'Teléfono del Acudiente',
+          'telefonoAcudiente',
+          'Teléfono del Acudiente',
+          'phone-pad'
+        )}
+        {renderInput('Seguro Laboral', 'seguroLaboral', 'Seguro Laboral')}
+        {renderInput('EPS', 'eps', 'EPS')}
+        {renderInput('Tipo Sanguíneo', 'tipoSangineo', 'Tipo Sanguíneo')}
+        {renderInput('Cargo', 'cargo', 'Cargo')}
+
         <View className='mb-4'>
-          <Text className='text-white'>Cédula</Text>
-          <TextInput
-            value={empleadoData.cedula}
-            onChangeText={(text) => handleInputChange('cedula', text)}
-            className='text-white border-b border-yellow-400 p-2'
-            placeholder='Cédula'
-            placeholderTextColor='#facc15'
-          />
+          <TouchableOpacity
+            onPress={seleccionarImagen}
+            className='border-b border-yellow-400 mb-10'
+            activeOpacity={0.7}
+          >
+            <Text className='py-2 text-white'>Foto (opcional)</Text>
+            <Text className='text-yellow-400 pb-3 pl-2'>
+              {empleadoData.foto ? 'Cambiar Foto' : 'Subir Foto'}
+            </Text>
+            {uploading ? (
+              <ActivityIndicator
+                size='large'
+                color='#FFC107'
+              />
+            ) : (
+              empleadoData.foto && (
+                <Image
+                  source={{ uri: empleadoData.foto }}
+                  className='w-24 h-24 rounded-full mb-4 justify-end'
+                />
+              )
+            )}
+          </TouchableOpacity>
         </View>
 
-        {/* Nombres */}
-        <View className='mb-4'>
-          <Text className='text-white'>Nombres</Text>
-          <TextInput
-            value={empleadoData.nombres}
-            onChangeText={(text) => handleInputChange('nombres', text)}
-            className='text-white border-b border-yellow-400 p-2'
-            placeholder='Nombres'
-            placeholderTextColor='#facc15'
-          />
-        </View>
-
-        {/* Apellidos */}
-        <View className='mb-4'>
-          <Text className='text-white'>Apellidos</Text>
-          <TextInput
-            value={empleadoData.apellidos}
-            onChangeText={(text) => handleInputChange('apellidos', text)}
-            className='text-white border-b border-yellow-400 p-2'
-            placeholder='Apellidos'
-            placeholderTextColor='#facc15'
-          />
-        </View>
-
-        {/* Correo */}
-        <View className='mb-4'>
-          <Text className='text-white'>Correo</Text>
-          <TextInput
-            value={empleadoData.correo}
-            onChangeText={(text) => handleInputChange('correo', text)}
-            className='text-white border-b border-yellow-400 p-2'
-            placeholder='Correo'
-            placeholderTextColor='#facc15'
-          />
-        </View>
-
-        {/* Teléfono */}
-        <View className='mb-4'>
-          <Text className='text-white'>Teléfono</Text>
-          <TextInput
-            value={empleadoData.telefono}
-            onChangeText={(text) => handleInputChange('telefono', text)}
-            className='text-white border-b border-yellow-400 p-2'
-            placeholder='Teléfono'
-            placeholderTextColor='#facc15'
-          />
-        </View>
-
-        {/* Dirección */}
-        <View className='mb-4'>
-          <Text className='text-white'>Dirección</Text>
-          <TextInput
-            value={empleadoData.direccion}
-            onChangeText={(text) => handleInputChange('direccion', text)}
-            className='text-white border-b border-yellow-400 p-2'
-            placeholder='Dirección'
-            placeholderTextColor='#facc15'
-          />
-        </View>
-
-        {/* Nombres del Acudiente */}
-        <View className='mb-4'>
-          <Text className='text-white'>Nombres del Acudiente</Text>
-          <TextInput
-            value={empleadoData.nombresAcudiente}
-            onChangeText={(text) => handleInputChange('nombresAcudiente', text)}
-            className='text-white border-b border-yellow-400 p-2'
-            placeholder='Nombres del Acudiente'
-            placeholderTextColor='#facc15'
-          />
-        </View>
-
-        {/* Teléfono del Acudiente */}
-        <View className='mb-4'>
-          <Text className='text-white'>Teléfono del Acudiente</Text>
-          <TextInput
-            value={empleadoData.telefonoAcudiente}
-            onChangeText={(text) =>
-              handleInputChange('telefonoAcudiente', text)
-            }
-            className='text-white border-b border-yellow-400 p-2'
-            placeholder='Teléfono del Acudiente'
-            placeholderTextColor='#facc15'
-          />
-        </View>
-
-        {/* Seguro Laboral */}
-        <View className='mb-4'>
-          <Text className='text-white'>Seguro Laboral</Text>
-          <TextInput
-            value={empleadoData.seguroLaboral}
-            onChangeText={(text) => handleInputChange('seguroLaboral', text)}
-            className='text-white border-b border-yellow-400 p-2'
-            placeholder='Seguro Laboral'
-            placeholderTextColor='#facc15'
-          />
-        </View>
-
-        {/* EPS */}
-        <View className='mb-4'>
-          <Text className='text-white'>EPS</Text>
-          <TextInput
-            value={empleadoData.eps}
-            onChangeText={(text) => handleInputChange('eps', text)}
-            className='text-white border-b border-yellow-400 p-2'
-            placeholder='EPS'
-            placeholderTextColor='#facc15'
-          />
-        </View>
-
-        {/* Tipo Sanguíneo */}
-        <View className='mb-4'>
-          <Text className='text-white'>Tipo Sanguíneo</Text>
-          <TextInput
-            value={empleadoData.tipoSangineo}
-            onChangeText={(text) => handleInputChange('tipoSangineo', text)}
-            className='text-white border-b border-yellow-400 p-2'
-            placeholder='Tipo Sanguíneo'
-            placeholderTextColor='#facc15'
-          />
-        </View>
-
-        {/* Cargo */}
-        <View className='mb-4'>
-          <Text className='text-white'>Cargo</Text>
-          <TextInput
-            value={empleadoData.cargo}
-            onChangeText={(text) => handleInputChange('cargo', text)}
-            className='text-white border-b border-yellow-400 p-2'
-            placeholder='Cargo'
-            placeholderTextColor='#facc15'
-          />
-        </View>
-
-        {/* Foto (URL opcional) */}
-        <View className='mb-4'>
-          <Text className='text-white'>Foto (URL opcional)</Text>
-          <TextInput
-            value={empleadoData.foto}
-            onChangeText={(text) => handleInputChange('foto', text)}
-            className='text-white border-b border-yellow-400 p-2'
-            placeholder='URL de la Foto'
-            placeholderTextColor='#facc15'
-          />
-        </View>
-
-        {/* Botón para agregar empleado */}
         <TouchableOpacity
           onPress={handleAgregarEmpleado}
           className='bg-yellow-400 p-4 rounded-full mb-10'
