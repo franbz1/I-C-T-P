@@ -21,7 +21,9 @@ export default function ProjectCard({ project, onDelete }) {
         );
     };
 
-    const toggleCollapse = () => setIsCollapsed((prev) => !prev);
+    const toggleCollapse = () => {
+        setIsCollapsed((prev) => !prev)
+    };
 
     return (
         <Animatable.View
