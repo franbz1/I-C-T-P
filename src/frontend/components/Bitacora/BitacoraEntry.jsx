@@ -47,7 +47,7 @@ const BitacoraEntry = ({ item, expandedEntry, toggleEntry, projectId, onEntryDel
         const nombres = await Promise.all(
           item.Empleados.map(async (empleadoId) => {
             const empleado = await getEmpleadoById(empleadoId);
-            return empleado.nombre;
+            return empleado.Nombres;
           })
         );
         setEmpleadoNombres(nombres);
