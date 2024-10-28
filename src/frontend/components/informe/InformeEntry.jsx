@@ -191,7 +191,7 @@ function InformeEntry({ informe, id, proyecto, isEditing }) {
         isEditable={isEditing}
       />
 
-      <TouchableOpacity className="bg-yellow-400 rounded-lg p-2 mt-4" onPress={exportarInforme}>
+      <TouchableOpacity className="bg-yellow-500 rounded-lg p-2 mt-4" onPress={exportarInforme}>
         <Text className="text-white text-center">Exportar Informe</Text>
       </TouchableOpacity>
     </View>
