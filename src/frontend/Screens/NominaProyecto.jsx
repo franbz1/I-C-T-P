@@ -21,7 +21,7 @@ export default function NominaProyecto() {
   const [empleadosProyecto, setEmpleadosProyecto] = useState([]);
   const [expandedId, setExpandedId] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [loading, setLoading] = useState(true); // Nuevo estado para el indicador de carga
+  const [loading, setLoading] = useState(true);
 
   const fetchEmpleadosProyecto = useCallback(async () => {
     try {
@@ -48,11 +48,11 @@ export default function NominaProyecto() {
   useEffect(() => {
     (async () => {
       try {
-        setLoading(true); // Mostrar indicador de carga
+        setLoading(true);
         const empleadosProyectoData = await fetchEmpleadosProyecto();
         await fetchEmpleados(empleadosProyectoData || []);
       } finally {
-        setLoading(false); // Ocultar indicador de carga
+        setLoading(false);
       }
     })();
   }, [fetchEmpleadosProyecto, fetchEmpleados]);
@@ -104,7 +104,7 @@ export default function NominaProyecto() {
             Empleados en el Proyecto
           </Text>
           
-          {loading ? ( // Mostrar indicador de carga si está cargando
+          {loading ? (
             <ActivityIndicator size="large" color="#FFD700" />
           ) : (
             <EmpleadoList
