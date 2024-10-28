@@ -1,17 +1,14 @@
 // components/BotonNavegacionProyecto.js
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 const BotonNavegacionProyecto = ({ texto, ruta, id, proyecto }) => {
   const navigation = useNavigation();
 
-  const handlePress = () => {
-    navigation.navigate(ruta, {id: id, proyecto: proyecto});
-  };
+  const handlePress = () => navigation.navigate(ruta, { id, proyecto });
 
-  // Asignar un color diferente basado en la ruta para mantener la consistencia visual
-  const getBackgroundColor = () => {
+  const backgroundColor = useMemo(() => {
     switch (ruta) {
       case 'Bitacora':
         return 'bg-yellow-400';
@@ -22,14 +19,14 @@ const BotonNavegacionProyecto = ({ texto, ruta, id, proyecto }) => {
       default:
         return 'bg-yellow-400';
     }
-  };
+  }, [ruta]);
 
   return (
     <Pressable
       onPress={handlePress}
-      className={`${getBackgroundColor()} p-3 rounded-lg mb-2`}
+      className={`${backgroundColor} p-3 rounded-lg mb-2`}
     >
-      <Text className='text-center text-black font-semibold'>
+      <Text className="text-center text-black font-semibold">
         {texto}
       </Text>
     </Pressable>

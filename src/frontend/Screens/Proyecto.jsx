@@ -40,7 +40,7 @@ const ProjectInfo = ({ nombre, contrato, fechaInicio, fechaFin }) => (
 const ProjectImage = ({ imageUrl }) => (
   <Image
     source={{ uri: imageUrl || 'https://via.placeholder.com/150' }}
-    className="w-full h-64 rounded-lg"
+    className="mt-2 w-full h-64 rounded-lg"
     resizeMode="cover"
   />
 );
