@@ -5,7 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import BarraOpciones from "../components/BarraOpciones";
 import EmpleadoList from "../components/Nomina/EmpleadoList";
 import AgregarEmpleadoBoton from "../components/Nomina/AgregarEmpleadoBoton";
-import { getEmpleados } from "../../Backend/services/Empleado";
+import { getEmpleados, deleteEmpleado } from "../../Backend/services/Empleado";
 
 export default function Nomina() {
   const [empleados, setEmpleados] = useState([]);
@@ -42,7 +42,16 @@ export default function Nomina() {
       "¿Estás seguro de que deseas eliminar este empleado?",
       [
         { text: "Cancelar", style: "cancel" },
-        { text: "Eliminar", style: "destructive", onPress: () => console.log("Eliminar empleado con ID:", id) },
+        { text: "Eliminar", style: "destructive", onPress: () => {
+          try {
+            deleteEmpleado(id)
+            setEmpleados(prevEmpleados => prevEmpleados.filter(empleado => empleado.id !== id))
+            alert('Empleado eliminado con éxito')
+          } catch (error) {
+            alert('Error al eliminar el empleado')
+            console.error('Error al eliminar el empleado:', error)
+          }
+        } },
       ]
     );
   };
