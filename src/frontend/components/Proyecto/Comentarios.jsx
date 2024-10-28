@@ -119,7 +119,6 @@ const Comentarios = ({ projectId }) => {
       };
 
       await createComentario(projectId, newCommentData);
-      setComments((prevComments) => [newCommentData, ...prevComments]);
       setNewComment({ titulo: '', detalles: '' });
     } catch (error) {
       Alert.alert('Error', 'No se pudo agregar el comentario.');

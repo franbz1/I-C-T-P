@@ -103,6 +103,11 @@ function useExportarInforme() {
               border-radius: 8px;
               margin: 10px 0;
             }
+            .image-gallery {
+              display: flex;
+              flex-wrap: wrap;
+              justify-content: center;
+            }
           </style>
         </head>
         <body>
@@ -123,12 +128,15 @@ function useExportarInforme() {
                 <div class="objetivo">
                   <h2>Objetivo : ${objetivo.Titulo}</h2>
                   <p><strong>Descripción:</strong> ${objetivo.Descripcion}</p>
-                  <p><strong>Estado:</strong> ${objetivo.Estado ? 'Completado' : 'Pendiente'}</p>
+                  <p><strong>Estado:</strong> ${objetivo.Completado ? 'Completado' : 'Pendiente'}</p>
                 </div>
               `).join('')}
             </div>
             <div class="section">
-              <p class="presupuesto"><strong>Presupuesto:</strong> $${informe.Presupuesto}</p>
+              <p class="presupuesto"><strong>Presupuesto:</strong> ${informe.Presupuesto.toLocaleString('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+              })}</p>
               <p class="contratistas"><strong>Contratistas:</strong> ${informe.Contratistas.join(', ')}</p>
             </div>
             <div class="section image-gallery">
@@ -150,22 +158,12 @@ function useExportarInforme() {
       const informe = (await fetchInforme(projectId, informeId)).data;
       
       const htmlContent = createHtmlTemplate(informe, objetivos);
-
-      // Generar PDF temporal
       const { uri: tempUri } = await Print.printToFileAsync({ html: htmlContent });
-      console.log('PDF temporal creado en:', tempUri);
-
-      // Definir la ruta permanente en el almacenamiento del dispositivo
       const pdfFilePath = `${FileSystem.documentDirectory}${informe.NombreProyecto}_Informe.pdf`;
-
-      // Copiar el archivo temporal a una ubicación permanente
       await FileSystem.moveAsync({
         from: tempUri,
         to: pdfFilePath,
       });
-      console.log('PDF guardado en:', pdfFilePath);
-
-      // Compartir el archivo
       if (Platform.OS === 'android' || Platform.OS === 'ios') {
         await Sharing.shareAsync(pdfFilePath);
       }
