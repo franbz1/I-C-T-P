@@ -1,5 +1,5 @@
-import { View, Text, Image, TextInput, Pressable, TouchableOpacity } from 'react-native'
-import { useEffect, useState } from 'react'
+import { View, Text, Image, TextInput, TouchableOpacity } from 'react-native'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import ProgressBar from '../ProgressBar'
 import Objetivos from './Objetivos'
 import Carousel from '../Carousel'
@@ -13,7 +13,6 @@ function InformeEntry({ informe, id, proyecto, isEditing }) {
   const { handleSelectImage } = useImageUpload()
   const { handleExportaInforme } = useExportarInforme()
 
-  // Estados locales para los campos editables
   const [introduccion, setIntroduccion] = useState(informe.Introduccion || '')
   const [desarrollo, setDesarrollo] = useState(informe.Desarrollo || '')
   const [presupuesto, setPresupuesto] = useState(informe.Presupuesto || 0)
@@ -22,35 +21,32 @@ function InformeEntry({ informe, id, proyecto, isEditing }) {
     informe.Contratistas.join(', ') || ''
   )
 
-  useEffect(() => {
-    toggleEditMode()
-  }, [isEditing])
+  const manejarObjetivos = useCallback(
+    (objetivosActualizados) => setObjetivos(objetivosActualizados),
+    []
+  )
 
-  const manejarObjetivos = (objetivosActualizados) => {
-    setObjetivos(objetivosActualizados)
-  }
+  const progreso = useMemo(() => {
+    if (!objetivos.length) return 0
+    const completados = objetivos.filter((objetivo) => objetivo.Completado).length
+    return Math.round((completados * 100) / objetivos.length)
+  }, [objetivos])
 
-  const formatTimestamp = (timestamp) => {
+  const formatTimestamp = useCallback((timestamp) => {
     if (!timestamp) return ''
-    const date = new Date(timestamp.seconds * 1000) // Convertir de segundos a milisegundos
+    const date = new Date(timestamp.seconds * 1000)
     return date.toLocaleDateString()
-  }
+  }, [])
 
-  function calcularProgreso(objetivos) {
-    if (!objetivos || objetivos.length === 0) return 0
-    let total = objetivos.filter((objetivo) => objetivo.Completado).length
-    return Math.round((total * 100) / objetivos.length)
-  }
+  useEffect(() => {
+    const guardarCambios = async () => {
+      if (!isEditing) {
+        const parsedBudget = parseFloat(presupuesto)
+        if (isNaN(parsedBudget)) {
+          alert('Por favor ingresa un presupuesto válido.')
+          return
+        }
 
-  const toggleEditMode = async () => {
-    if (!isEditing) {
-      const parsedBudget = parseFloat(presupuesto)
-      if (isNaN(parsedBudget)) {
-        alert('Por favor ingresa un presupuesto válido.')
-        return
-      }
-
-      try {
         const informeData = {
           NombreProyecto: proyecto.Nombre,
           Contrato: proyecto.Contrato,
@@ -62,27 +58,26 @@ function InformeEntry({ informe, id, proyecto, isEditing }) {
           Presupuesto: parsedBudget,
           Contratistas: contratistas.split(',').map((item) => item.trim()),
         }
-        await updateInforme(proyecto.id, informe.id, informeData)
-        setIntroduccion(informeData.Introduccion)
-        setDesarrollo(informeData.Desarrollo)
-        setPresupuesto(informeData.Presupuesto)
-        setContratistas(informeData.Contratistas.join(', '))
-      } catch (error) {
-        console.error('Error al actualizar el informe:', error)
-        alert('No se pudo actualizar el informe. Inténtalo de nuevo.')
+
+        try {
+          await updateInforme(proyecto.id, informe.id, informeData)
+        } catch (error) {
+          console.error('Error al actualizar el informe:', error)
+          alert('No se pudo actualizar el informe. Inténtalo de nuevo.')
+        }
       }
     }
-  }
+    guardarCambios()
+  }, [isEditing])
 
-  const handleAddImage = async () => {
+  const handleAddImage = useCallback(async () => {
     try {
       setIsUploading(true)
       const url = await handleSelectImage()
       if (url) {
         const updatedFotos = [...fotos, url]
-        setFotos(updatedFotos) // Actualizar fotos en el frontend
-        const updatedInforme = { ...informe, Fotos: updatedFotos } // Actualizar informe con las nuevas fotos
-        await updateInforme(proyecto.id, informe.id, updatedInforme)
+        setFotos(updatedFotos)
+        await updateInforme(proyecto.id, informe.id, { ...informe, Fotos: updatedFotos })
       }
     } catch (error) {
       console.error('Error al subir la foto:', error)
@@ -90,93 +85,84 @@ function InformeEntry({ informe, id, proyecto, isEditing }) {
     } finally {
       setIsUploading(false)
     }
-  }
+  }, [fotos, handleSelectImage, informe, proyecto.id])
 
-  const handleRemoveImage = async (index) => {
+  const handleRemoveImage = useCallback(async (index) => {
     try {
       setIsUploading(true)
-
       const updatedFotos = fotos.filter((_, i) => i !== index)
       setFotos(updatedFotos)
-      const updatedInforme = { ...informe, Fotos: updatedFotos }
-      await updateInforme(proyecto.id, informe.id, updatedInforme)
+      await updateInforme(proyecto.id, informe.id, { ...informe, Fotos: updatedFotos })
       alert('Foto eliminada correctamente')
-      setIsUploading(false)
     } catch (error) {
-      console.error('error al elimnar la foto:', error)
+      console.error('Error al eliminar la foto:', error)
       alert('No se pudo eliminar la foto. Inténtalo de nuevo.')
+    } finally {
       setIsUploading(false)
     }
-  }
+  }, [fotos, informe, proyecto.id])
 
-  const exportarInforme = async () => {
+  const exportarInforme = useCallback(() => {
     handleExportaInforme(id, informe.id, objetivos)
-  }
+  }, [handleExportaInforme, id, informe.id, objetivos])
 
   return (
-    <View className='flex-1'>
-      <ProgressBar estado={calcularProgreso(objetivos)} />
-      <Text className='text-yellow-500 text-center text-2xl font-bold'>
+    <View className="flex-1">
+      <ProgressBar estado={progreso} />
+      <Text className="text-yellow-500 text-center text-2xl font-bold">
         {proyecto.Nombre}
       </Text>
-      <Text className='text-white mt-2'>
-        Número de Contrato: {proyecto.Contrato}
-      </Text>
-      <Text className='text-white mb-2'>
-        Desde: {formatTimestamp(proyecto.FechaInicio)} | Hasta:{' '}
-        {formatTimestamp(proyecto.FechaFin)}
+      <Text className="text-white mt-2">Número de Contrato: {proyecto.Contrato}</Text>
+      <Text className="text-white mb-2">
+        Desde: {formatTimestamp(proyecto.FechaInicio)} | Hasta: {formatTimestamp(proyecto.FechaFin)}
       </Text>
       <Image
         source={{ uri: proyecto.Imagen || 'https://via.placeholder.com/150' }}
-        className='w-full h-48 rounded-lg'
-        resizeMode='cover'
+        className="w-full h-48 rounded-lg"
+        resizeMode="cover"
       />
 
-      <Text className='text-white text-xl mt-2 text-center'>Introducción</Text>
+      <Text className="text-white text-xl mt-2 text-center">Introducción</Text>
       {isEditing ? (
         <TextInput
           value={introduccion}
           onChangeText={setIntroduccion}
-          className='text-white rounded-lg border border-gray-500 p-2 mb-2'
-          multiline={true}
+          className="text-white rounded-lg border border-gray-500 p-2 mb-2"
+          multiline
         />
       ) : (
-        <Text className='text-white rounded-lg border p-2 mb-2'>
+        <Text className="text-white rounded-lg border p-2 mb-2">
           {introduccion}
         </Text>
       )}
 
-      <Text className='text-white text-xl mt-2 text-center'>Desarrollo</Text>
+      <Text className="text-white text-xl mt-2 text-center">Desarrollo</Text>
       {isEditing ? (
         <TextInput
           value={desarrollo}
           onChangeText={setDesarrollo}
-          className='text-white rounded-lg border border-gray-500 p-2 mb-2'
-          multiline={true}
+          className="text-white rounded-lg border border-gray-500 p-2 mb-2"
+          multiline
         />
       ) : (
-        <Text className='text-white rounded-lg border p-2 mb-2'>
+        <Text className="text-white rounded-lg border p-2 mb-2">
           {desarrollo}
         </Text>
       )}
 
-      <Objetivos
-        projectId={id}
-        informeId={informe.id}
-        actualObjectives={manejarObjetivos}
-      />
+      <Objetivos projectId={id} informeId={informe.id} actualObjectives={manejarObjetivos} />
 
-      <View className='flex-row justify-between items-center'>
-        <Text className='text-white text-lg'>Presupuesto:</Text>
+      <View className="flex-row justify-between items-center">
+        <Text className="text-white text-lg">Presupuesto:</Text>
         {isEditing ? (
           <TextInput
             value={presupuesto.toString()}
             onChangeText={setPresupuesto}
-            keyboardType='numeric'
-            className='text-white text-lg border-b border-gray-500'
+            keyboardType="numeric"
+            className="text-white text-lg border-b border-gray-500"
           />
         ) : (
-          <Text className='text-white text-lg'>
+          <Text className="text-white text-lg">
             {presupuesto.toLocaleString('es-CO', {
               style: 'currency',
               currency: 'COP',
@@ -185,30 +171,28 @@ function InformeEntry({ informe, id, proyecto, isEditing }) {
         )}
       </View>
 
-      <Text className='text-white mt-2'>Contratistas:</Text>
+      <Text className="text-white mt-2">Contratistas:</Text>
       {isEditing ? (
         <TextInput
           value={contratistas}
           onChangeText={setContratistas}
-          className='text-white rounded-lg border-b border-gray-500 mb-2'
+          className="text-white rounded-lg border-b border-gray-500 mb-2"
         />
       ) : (
-        <Text className='text-white mb-2'>{contratistas}</Text>
+        <Text className="text-white mb-2">{contratistas}</Text>
       )}
+
       <Carousel
-        className='mb-2'
+        className="mb-2"
         images={fotos}
         onAddImage={handleAddImage}
         onRemoveImage={handleRemoveImage}
         isUploading={isUploading}
-        isEditable={true}
+        isEditable={isEditing}
       />
 
-      <TouchableOpacity
-        className='bg-yellow-400 rounded-lg p-2 mt-4'
-        onPress={exportarInforme}
-      >
-        <Text className='text-white text-center'>Exportar Informe</Text>
+      <TouchableOpacity className="bg-yellow-400 rounded-lg p-2 mt-4" onPress={exportarInforme}>
+        <Text className="text-white text-center">Exportar Informe</Text>
       </TouchableOpacity>
     </View>
   )
