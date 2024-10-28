@@ -28,12 +28,6 @@ export default function ModalCrearProyecto({ visible, onClose, onProjectAdded })
       return;
     }
 
-  const handleCloseModal = () => {
-    setNewProject({ contractNumber: '', name: '', startDate: '', endDate: '', image: '' });
-    setImageUri(null);
-    onClose();
-  }
-
     const imageUrl = newProject.image || 'https://via.placeholder.com/150';
     const projectData = {
       contract: newProject.contractNumber,
@@ -47,7 +41,7 @@ export default function ModalCrearProyecto({ visible, onClose, onProjectAdded })
       const newProjectId = await createProject(projectData);
       onProjectAdded({ id: newProjectId, ...projectData });
       setNewProject({ contractNumber: '', name: '', startDate: '', endDate: '', image: '' });
-      onClose();
+      handleCloseModal();
     } catch {
       Alert.alert('Error', 'No se pudo añadir el proyecto.');
     }
@@ -60,8 +54,14 @@ export default function ModalCrearProyecto({ visible, onClose, onProjectAdded })
     }
   };
 
+  const handleCloseModal = () => {
+    setNewProject({ contractNumber: '', name: '', startDate: '', endDate: '', image: '' });
+    setImageUri(null);
+    onClose();
+  }
+
   return (
-    <Modal visible={visible} transparent onRequestClose={onClose}>
+    <Modal visible={visible} transparent onRequestClose={handleCloseModal}>
       <View className="flex-1 bg-black bg-opacity-50 justify-center items-center">
         <View className="w-4/5 bg-neutral-800 rounded-lg p-5">
           <Text className="text-lg font-bold text-yellow-400 mb-2">Añadir Proyecto</Text>
@@ -100,7 +100,7 @@ export default function ModalCrearProyecto({ visible, onClose, onProjectAdded })
           <Pressable className="bg-yellow-400 py-2 px-5 rounded-md mb-2" onPress={handleAddProject}>
             <Text className="text-black font-bold">Añadir Proyecto</Text>
           </Pressable>
-          <Pressable className="bg-gray-500 py-2 px-4 rounded-md" onPress={onClose}>
+          <Pressable className="bg-gray-500 py-2 px-4 rounded-md" onPress={handleCloseModal}>
             <Text className="text-white">Cerrar</Text>
           </Pressable>
         </View>
