@@ -92,6 +92,7 @@ const useImageUpload = () => {
     takePhotoWithCamera,
     handleUploadImage,
     handleSelectImage,
+    setImageUri,
     uriUploaded,
   };
 };

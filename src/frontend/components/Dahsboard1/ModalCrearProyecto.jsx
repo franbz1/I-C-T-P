@@ -13,7 +13,7 @@ export default function ModalCrearProyecto({ visible, onClose, onProjectAdded })
     image: '',
   });
 
-  const { handleSelectImage, uploading, imageUri } = useImageUpload();
+  const { handleSelectImage, uploading, imageUri, setImageUri } = useImageUpload();
   const [isStartDatePickerVisible, setStartDatePickerVisibility] = useState(false);
   const [isEndDatePickerVisible, setEndDatePickerVisibility] = useState(false);
 
@@ -27,6 +27,12 @@ export default function ModalCrearProyecto({ visible, onClose, onProjectAdded })
       Alert.alert('Error', 'Por favor completa todos los campos obligatorios.');
       return;
     }
+
+  const handleCloseModal = () => {
+    setNewProject({ contractNumber: '', name: '', startDate: '', endDate: '', image: '' });
+    setImageUri(null);
+    onClose();
+  }
 
     const imageUrl = newProject.image || 'https://via.placeholder.com/150';
     const projectData = {
