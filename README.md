@@ -2,7 +2,7 @@
 
 Este repositorio contiene la aplicación de gestión de proyectos desarrollada para la hackatón de Parquesoft Nariño en colaboración con la empresa de ingeniería eléctrica **I-C-T-P**. La aplicación ha sido diseñada para facilitar el seguimiento, la administración y la optimización de los proyectos de ingeniería de la empresa, utilizando tecnologías modernas y enfocándonos en la simplicidad y la eficiencia.
 
-![Imagen de WhatsApp 2025-06-25 a las 22 23 34_7d9ffb5c](https://github.com/user-attachments/assets/42599916-b9d1-4cce-82ad-3c1ddf5212e6)
+![ictp](https://github.com/user-attachments/assets/aafc058c-0989-414a-ba42-2778c7b6e756)
 
 ## Descripción
 
