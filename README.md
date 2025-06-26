@@ -2,6 +2,8 @@
 
 Este repositorio contiene la aplicación de gestión de proyectos desarrollada para la hackatón de Parquesoft Nariño en colaboración con la empresa de ingeniería eléctrica **I-C-T-P**. La aplicación ha sido diseñada para facilitar el seguimiento, la administración y la optimización de los proyectos de ingeniería de la empresa, utilizando tecnologías modernas y enfocándonos en la simplicidad y la eficiencia.
 
+![Imagen de WhatsApp 2025-06-25 a las 22 23 34_7d9ffb5c](https://github.com/user-attachments/assets/42599916-b9d1-4cce-82ad-3c1ddf5212e6)
+
 ## Descripción
 
 La aplicación de gestión de proyectos I-C-T-P permite a los administradores y empleados de la empresa visualizar, organizar y realizar un seguimiento de cada proyecto en tiempo real. Desde la asignación de tareas hasta el seguimiento de avances y el almacenamiento seguro de archivos, esta solución está diseñada para cubrir las necesidades clave de la gestión de proyectos en el sector de ingeniería eléctrica.
@@ -9,9 +11,21 @@ La aplicación de gestión de proyectos I-C-T-P permite a los administradores y 
 ## Características
 
 - **Dashboard de Proyectos**: Vista centralizada con todos los proyectos activos, donde cada proyecto muestra su estado actual, fechas importantes y responsables.
+
+![Imagen de WhatsApp 2025-06-25 a las 22 23 35_cde73176](https://github.com/user-attachments/assets/7b3d6954-0403-403c-9894-89a93eed92da)
+
 - **Gestión de Tareas**: Creación, asignación y seguimiento de tareas específicas dentro de cada proyecto.
+
+![Imagen de WhatsApp 2025-06-25 a las 22 23 36_d984beaa](https://github.com/user-attachments/assets/bf7f1440-7423-45a3-9f81-85bc3a56c4f9)
+  
 - **Bitácora y Registros**: Captura y almacenamiento de registros de actividades diarias, incluyendo detalles, empleados involucrados y recursos utilizados.
+
+![Imagen de WhatsApp 2025-06-25 a las 22 23 35_67dd2852](https://github.com/user-attachments/assets/c1ed1e27-5e24-4350-bb5d-2fa7f2c9fab0)
+  
 - **Gestión de Empleados**: Administración de perfiles de empleados asociados a proyectos específicos, con roles, permisos y áreas de especialización.
+
+![Imagen de WhatsApp 2025-06-25 a las 22 23 36_353734f3](https://github.com/user-attachments/assets/e100841b-a331-4ef9-b663-9e744488985b)
+
 - **Subida y Organización de Documentos**: Integración de subida de documentos y archivos relevantes para cada proyecto con almacenamiento en la nube.
 - **Interfaz de Usuario Intuitiva**: Diseño enfocado en la usabilidad para dispositivos móviles y optimizado para ingenieros y personal de proyectos.
 - **Actualizaciones en Tiempo Real**: Utilización de Firebase para actualizaciones en tiempo real en el dashboard y las vistas de proyecto.
